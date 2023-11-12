@@ -1,11 +1,11 @@
-import logo from './logo.svg';
+
 import './App.css';
 import Signup from './components/signup';
 import LoginPage from './components/login';
 import Main from './components/Main'
+import QZPage from './components/SEQuizGenerator'
 
-import {BrowserRouter, Routes,Route,Link, useSearchParams} from 'react-router-dom'
-import { useState } from 'react';
+import {BrowserRouter, Routes,Route} from 'react-router-dom'
 
 function App() {
   return (
@@ -16,6 +16,7 @@ function App() {
     <Route path="/" exact={true} element={<Main />}></Route>
     <Route path="/login" exact={true} element={<LoginPage />}></Route>
     <Route path="/signup" exact={true} element={<Signup />}></Route>
+    <Route path="/SEQuizGenerator" exact={true} element={<QZPage />}></Route>
         
     </Routes>
     </BrowserRouter>
