@@ -12,7 +12,13 @@ function MainPage() {
     navigate('/signup');
   };
   const navigateToQZ = () => {
-    navigate('/SEQuizGenerator');
+    navigate('/QuizData');
+  };
+  const navigateToQZSet = () => {
+    navigate('/QuizSet');
+  };
+  const navigateToQZSpace = () => {
+    navigate('/QuizSpace');
   };
   return (
     <div style={{ background: '#FFC107', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -26,6 +32,12 @@ function MainPage() {
         </button>
         <button onClick={navigateToQZ} style={{ background: '#FF9800', color: 'white', padding: 10, borderRadius: 4, border: 'none', fontWeight: 'bold', marginBottom: 8 }}>
           QZ
+        </button>
+        <button onClick={navigateToQZSet} style={{ background: 'transparent', color: '#FF9800', padding: 10, borderRadius: 4, border: '1px solid #FF9800', fontWeight: 'bold',marginBottom: 8 }}>
+          QZSet
+        </button>
+        <button onClick={navigateToQZSpace} style={{ background: '#FF9800', color: 'white', padding: 10, borderRadius: 4, border: 'none', fontWeight: 'bold', marginBottom: 8 }}>
+          QZSpace
         </button>
       </div>
     </div>
