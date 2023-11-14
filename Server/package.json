@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@nestjs/cli": "^10.2.1"
+    "@nestjs/cli": "^10.2.1",
+    "@nestjs/mapped-types": "*"
   }
 }
