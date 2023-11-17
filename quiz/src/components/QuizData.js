@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-function SEQuizGenerator() {
+function QuizData() {
   const [quizContent, setQuizContent] = useState('');
   const [title, setTitle] = useState('');
   const [questionType, setQuestionType] = useState('multiple-choice');
-  const [difficulty, setDifficulty] = useState(2); // 1 = Hard, 2 = Medium, 3 = Easy
+  const [difficulty, setDifficulty] = useState(2);
   const [quizCount, setQuizCount] = useState(1);
 
   const handleQuizContentChange = (event) => {
@@ -33,7 +33,7 @@ function SEQuizGenerator() {
   };
 
   // Define the difficulty levels
-  const difficultyLevels = ['Hard', 'Medium', 'Easy'];
+  const difficultyLevels = ['Easy', 'Medium', 'Hard'];
 
   const mainContainerStyle = {
     position: 'relative', // 상대 위치
@@ -50,8 +50,8 @@ function SEQuizGenerator() {
     top: '15%', // 상단으로부터 20% 떨어짐
     left: '50%', // 좌우 가운데 정렬을 위해 왼쪽에서 50% 위치
     transform: 'translateX(-50%)', // X축 기준으로 -50% 이동하여 가운데 정렬
-    width: '65%', // 너비 65%
-    height: '70%', // 높이 40%
+    width: '55%', // 너비 65%
+    height: '60%', // 높이 40%
     backgroundColor: '#FFC107', // 주황색 배경
     borderRadius: '100px', // 둥근 모서리
     zIndex: -1, // 내용 뒤에 위치
@@ -61,8 +61,8 @@ function SEQuizGenerator() {
     backgroundColor: 'white',
     borderRadius: '100px', // 둥근 모서리
     padding: '20px',
-    width: '50%', // 너비 70%
-    height: '65%', // 높이 45%
+    width: '40%', // 너비 70%
+    height: '55%',
     position: 'absolute', // 절대 위치
     top: '30%', // 상단으로부터 50% 위치에 배치
     left: '50%', // 좌우 가운데 정렬을 위해 왼쪽에서 50% 위치
@@ -74,6 +74,15 @@ function SEQuizGenerator() {
     zIndex: 1, // 주황색 배경 위에 위치
     overflow: 'hidden', // 내용이 넘치지 않도록 설정
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 그림자 효과 추가
+    
+  };
+  const formStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between', // 아이템 사이에 균등한 간격을 줌
+    height: '100%', // 부모 요소의 높이를 꽉 채움
+    width: '100%', // 부모 요소의 폭을 꽉 채움
+    marginLeft: '20px',
     
   };
 
@@ -95,25 +104,25 @@ function SEQuizGenerator() {
           placeholder="   Enter quiz content here..."
           style={{ ...inputStyle, height: '100%', resize: 'none' }}
         />
-        <div style={{ width: '100%' }}>
+        <div style={formStyle}>
           <input type="text" value={title} onChange={handleTitleChange} placeholder="Title" style={inputStyle} />
           <select value={questionType} onChange={handleQuestionTypeChange} style={inputStyle}>
             <option value="multiple-choice">객관식</option>
             <option value="short-answer">주관식</option>
           </select>
-          <div style={{ ...inputStyle, padding: '0' }}>
-            <label style={{ width: '100%' }}>
-              Difficulty:
-              <input
-                type="range"
-                min="1"
-                max="3"
-                value={difficulty}
-                onChange={handleDifficultyChange}
-                style={{ width: '100%', margin: '10px 0' }}
-              />
-            </label>
-          </div>
+          <div style={{ width: '100%', padding: '0', boxSizing: 'border-box' }}>
+  <label htmlFor="difficulty" style={{ width: '100%' }}></label>
+  <input
+    id="difficulty"
+    type="range"
+    min="1"
+    max="3"
+    value={difficulty}
+    onChange={handleDifficultyChange}
+    style={{ width: '100%', margin: '10px 0' }}
+  />
+  <span>난이도 : {difficultyLevels[difficulty - 1]}</span>
+</div>
           <input
             type="number"
             min="1"
@@ -152,7 +161,10 @@ const buttonStyle = {
   color: 'white',
   fontWeight: 'bold',
   cursor: 'pointer',
-  width: '100%',
+  width: '50%',
+  alignSelf: 'center',
+  
+
 };
 
-export default SEQuizGenerator;
+export default QuizData;
