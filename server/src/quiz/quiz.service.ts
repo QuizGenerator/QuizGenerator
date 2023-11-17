@@ -5,7 +5,7 @@ import { UpdateQuizDto } from './dto/update-quiz.dto';
 @Injectable()
 export class QuizService {
   create(createQuizDto: CreateQuizDto) {
-    return 'This action adds a new quiz';
+    return 'practice';
   }
 
   findAll() {
