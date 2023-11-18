@@ -6,9 +6,17 @@ function QuizData() {
   const [questionType, setQuestionType] = useState('multiple-choice');
   const [difficulty, setDifficulty] = useState(2);
   const [quizCount, setQuizCount] = useState(1);
+  const [generatedQuizzes, setGeneratedQuizzes] = useState('');
+  const [showModal, setShowModal] = useState(false); 
+  // 최대 퀴즈 개수 계산
+  const maxQuizCount = quizContent.length > 2000 ? 5 : quizContent.length > 1000 ? 4 : 3;
 
   const handleQuizContentChange = (event) => {
     setQuizContent(event.target.value);
+    // 입력된 글자 수에 따라 quizCount 최대 값을 조정
+    if (quizCount > maxQuizCount) {
+      setQuizCount(maxQuizCount);
+    }
   };
 
   const handleTitleChange = (event) => {
@@ -27,13 +35,69 @@ function QuizData() {
     setQuizCount(event.target.value);
   };
 
-  const handleCreateQuiz = () => {
-    // Logic to handle quiz creation
-    alert('Quiz Created!');
+  const handleCreateQuiz = async () => {
+    const prompt = `다음 내용을 바탕으로 ${quizCount}개의 ${questionType === 'multiple-choice' ? '객관식' : '주관식'} 
+                    문제를 생성하세요:\n난이도: ${difficultyLevels[difficulty - 1]}\n${quizContent}`;
+  
+    try {
+      const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // 환경 변수나 다른 방법으로 API 키를 안전하게 관리하세요
+          "Authorization": `Bearer ${process.env.REACT_APP_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "text-davinci-003", // 사용할 모델
+          prompt: prompt,
+          max_tokens: 1000, // 응답의 길이 제한
+        }),
+      });
+  
+      const data = await response.json();
+      setGeneratedQuizzes(data.choices.map(choice => choice.text).join("\n\n"));
+      setShowModal(true);
+      alert('퀴즈가 생성되었습니다!');
+    } catch (error) {
+      console.error('GPT API 호출 중 오류 발생:', error);
+      alert('퀴즈 생성에 실패했습니다.');
+    }
   };
+
+  // 모달을 닫는 함수
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  // 모달 컴포넌트
+  const Modal = ({ onClose, children }) => (
+    <div style={modalStyle}>
+      <div style={modalContentStyle}>
+        <button onClick={onClose} style={closeButtonStyle}>닫기</button>
+        {children}
+      </div>
+    </div>
+  );
+  
 
   // Define the difficulty levels
   const difficultyLevels = ['Easy', 'Medium', 'Hard'];
+
+  // Number of Quizzes 입력란과 텍스트 추가
+  const quizCountInputSection = (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <input
+        type="number"
+        min="1"
+        max={maxQuizCount} // 계산된 최대 퀴즈 개수로 설정
+        value={quizCount}
+        onChange={handleQuizCountChange}
+        placeholder="Number of Quizzes"
+        style={inputStyle}
+      />
+      <span style={{ marginLeft: '10px' }}>퀴즈 최대 갯수: {maxQuizCount}</span>
+    </div>
+  );
 
   const mainContainerStyle = {
     position: 'relative', // 상대 위치
@@ -74,7 +138,7 @@ function QuizData() {
     zIndex: 1, // 주황색 배경 위에 위치
     overflow: 'hidden', // 내용이 넘치지 않도록 설정
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 그림자 효과 추가
-    
+
   };
   const formStyle = {
     display: 'flex',
@@ -83,7 +147,7 @@ function QuizData() {
     height: '100%', // 부모 요소의 높이를 꽉 채움
     width: '100%', // 부모 요소의 폭을 꽉 채움
     marginLeft: '20px',
-    
+
   };
 
   return (
@@ -111,31 +175,30 @@ function QuizData() {
             <option value="short-answer">주관식</option>
           </select>
           <div style={{ width: '100%', padding: '0', boxSizing: 'border-box' }}>
-  <label htmlFor="difficulty" style={{ width: '100%' }}></label>
-  <input
-    id="difficulty"
-    type="range"
-    min="1"
-    max="3"
-    value={difficulty}
-    onChange={handleDifficultyChange}
-    style={{ width: '100%', margin: '10px 0' }}
-  />
-  <span>난이도 : {difficultyLevels[difficulty - 1]}</span>
-</div>
-          <input
-            type="number"
-            min="1"
-            max={Math.floor(quizContent.length / 50) || 1}
-            value={quizCount}
-            onChange={handleQuizCountChange}
-            placeholder="Number of Quizzes"
-            style={inputStyle}
-          />
+            <label htmlFor="difficulty" style={{ width: '100%', }}></label>
+            <input
+              id="difficulty"
+              type="range"
+              min="1"
+              max="3"
+              value={difficulty}
+              onChange={handleDifficultyChange}
+              style={{ width: '100%', margin: '10px 0', }}
+            />
+            <span>난이도 : {difficultyLevels[difficulty - 1]}</span>
+          </div>
+          {quizCountInputSection}
           <button onClick={handleCreateQuiz} style={buttonStyle}>
             Quiz 생성
           </button>
-        </div>
+          </div>
+      {/* 생성된 퀴즈 표시 */}
+      {showModal && (
+        <Modal onClose={handleCloseModal}>
+          <h2>생성된 퀴즈:</h2>
+          <div>{generatedQuizzes}</div>
+        </Modal>
+      )}
       </div>
     </div>
   );
@@ -143,15 +206,15 @@ function QuizData() {
 
 
 const inputStyle = {
-    padding: '10px',
-    marginBottom: '10px',
-    borderRadius: '50px',
-    border: '1px solid #ddd',
-    width: 'calc(100% - 40px)', // 전체 폭에서 padding 값을 빼줌
-    boxSizing: 'border-box', // border와 padding이 width에 포함되도록 설정
+  padding: '10px',
+  marginBottom: '10px',
+  borderRadius: '50px',
+  border: '1px solid #ddd',
+  width: 'calc(100% - 40px)', // 전체 폭에서 padding 값을 빼줌
+  boxSizing: 'border-box', // border와 padding이 width에 포함되도록 설정
 
-    
-  };
+
+};
 
 const buttonStyle = {
   padding: '10px',
@@ -163,8 +226,36 @@ const buttonStyle = {
   cursor: 'pointer',
   width: '50%',
   alignSelf: 'center',
-  
 
+
+};
+
+// ... 기존 스타일 정의 및 추가 모달 스타일
+const modalStyle = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const modalContentStyle = {
+  backgroundColor: 'white',
+  padding: '20px',
+  borderRadius: '10px',
+};
+
+const closeButtonStyle = {
+  position: 'absolute',
+  top: '10px',
+  right: '10px',
+  border: 'none',
+  backgroundColor: 'transparent',
+  cursor: 'pointer',
 };
 
 export default QuizData;
