@@ -1,4 +1,4 @@
-/server/src/config/env/.env
+/src/config/.env
 
 # compiled output
 /dist
