@@ -1,4 +1,4 @@
-import { User } from 'src/auth/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Category } from 'src/category/entities/category.entity';
 import { Quiz } from 'src/quiz/entities/quiz.entity';
 import {
