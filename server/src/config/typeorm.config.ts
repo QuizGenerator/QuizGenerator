@@ -15,7 +15,6 @@ export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
       port: +configService.get('DB_PORT'),
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
-      database: configService.get('DB_DATABASE'),
       entities: [Category, User, Data, Quiz],
       synchronize: false,
       logging: false,

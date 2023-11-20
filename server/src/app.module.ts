@@ -14,7 +14,7 @@ import { UserModule } from './user/user.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `./src/config/env/.env`,
+      envFilePath: `./src/config/.env`,
     }),
     TypeOrmModule.forRootAsync(typeOrmConfig),
     AuthModule,
