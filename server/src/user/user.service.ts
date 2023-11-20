@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignUpDto } from 'src/auth/dto/sign-up.dto';
+import { Sign } from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -20,9 +21,13 @@ export class UserService {
   }
 
   async createOne(signUpDto: SignUpDto): Promise<User> {
-    const user: User = await signUpDto.createEntity();
-    await this.userRepository.save(user);
-    return user;
+    try {
+      const user = await signUpDto.createEntity();
+      await this.userRepository.save(user);
+      return user;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUserInfo(id: number) {

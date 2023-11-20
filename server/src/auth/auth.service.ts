@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
@@ -45,10 +45,11 @@ export class AuthService {
 
   async signUp(signUpDto: SignUpDto): Promise<boolean> {
     try {
-      this.userService.createOne(signUpDto);
+      await this.userService.createOne(signUpDto);
       return true;
     } catch (error) {
-      throw error;
+      console.log(error.message);
+      throw new InternalServerErrorException();
     }
   }
 }
