@@ -2,26 +2,44 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDatumDto } from './dto/create-datum.dto';
 import { DataRepository } from './data.repository';
 import { Data } from "./entities/data.entity"
+import { AuthService } from "../auth/auth.service"
+import { QuizService } from 'src/quiz/quiz.service';
 
 @Injectable()
 export class DataService {
 
   constructor(
     private dataRepository: DataRepository,
+    private authService: AuthService,
+    private quizService: QuizService,
   ){}
 
   async createData(createDatumDto: CreateDatumDto): Promise <Data> {
-    const {inputText, difficulty, type, dataTitle, quizNum, quizzes} = createDatumDto;
+    const {inputText, difficulty, type, dataTitle, quizNum, quizzes, user} = createDatumDto;
+    const uid = await this.authService.getUserById(user);
+    if(uid === null){
+      return null;
+    }
 
-    const Data = this.dataRepository.create({
+    const Data = await this.dataRepository.create({
       inputText: inputText,
       difficulty: difficulty,
       type: type,
       dataTitle: dataTitle,
       quizNum: quizNum,
-      quizzes: quizzes,
+      user: { id: uid?.id },
     })
-    await this.dataRepository.save(Data);
+
+    const createdData = await this.dataRepository.save(Data);
+
+    for(const quiz of quizzes){
+      await this.quizService.createQuiz({
+        quizText: quiz.quizText,
+        quizAnswer: quiz.quizAnswer,
+        data: createdData,
+      })
+    }
+
     return Data;
   }
 
