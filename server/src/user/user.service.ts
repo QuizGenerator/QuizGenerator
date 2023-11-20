@@ -3,7 +3,6 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignUpDto } from 'src/auth/dto/sign-up.dto';
-import { Category } from 'src/category/entities/category.entity';
 
 @Injectable()
 export class UserService {
@@ -28,7 +27,7 @@ export class UserService {
 
   async getUserInfo(id: number) {
     const row: User = await this.userRepository.findOne({
-      relations: ['categories'],
+      relations: { categories: true },
       select: {
         id: true,
         account: true,
