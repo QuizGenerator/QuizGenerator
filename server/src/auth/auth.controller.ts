@@ -1,34 +1,42 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { SignInDto } from './dto/sign-in.dto';
+import { SignUpDto } from './dto/sign-up.dto';
+import { UserService } from 'src/user/user.service';
+import { LoginResultType } from './interface/login-result.interface';
+import { CookieOptions, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post('signin')
+  async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) res: Response) {
+    const loginRes: LoginResultType = await this.authService.signIn(signInDto.userId, signInDto.password);
+    res.cookie('AccessToken', loginRes.accessToken, loginRes.cookieOption);
+    return;
+  }
+
+  @Post('signup')
+  signUp(@Body() signUpDto: SignUpDto): Promise<boolean> {
+    return this.authService.signUp(signUpDto);
+  }
+
+  @Get('check')
+  checkAccount(@Param('account') account: string): boolean {
+    try {
+      this.userService.findbyAccount(account);
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  test() {
+    this.userService.getUserInfo(3);
   }
 }

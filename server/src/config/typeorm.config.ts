@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
-import { User } from 'src/auth/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Category } from 'src/category/entities/category.entity';
 import { Data } from 'src/data/entities/data.entity';
 import { Quiz } from 'src/quiz/entities/quiz.entity';

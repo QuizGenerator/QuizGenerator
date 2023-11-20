@@ -8,6 +8,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
 import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ConfigModule } from '@nestjs/config';
     DataModule,
     CategoryModule,
     QuizModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
