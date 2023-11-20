@@ -21,8 +21,15 @@ export class AuthController {
   }
 
   @Post('signup')
-  signUp(@Body() signUpDto: SignUpDto): Promise<boolean> {
-    return this.authService.signUp(signUpDto);
+  async signUp(@Body() signUpDto: SignUpDto): Promise<boolean> {
+    console.log(signUpDto);
+    console.log(typeof signUpDto.account);
+    const signUp: SignUpDto = new SignUpDto();
+    signUp.account = signUpDto.account;
+    signUp.password = signUpDto.password;
+    signUp.name = signUpDto.name;
+    console.log(signUp);
+    return await this.authService.signUp(signUp);
   }
 
   @Get('check')
