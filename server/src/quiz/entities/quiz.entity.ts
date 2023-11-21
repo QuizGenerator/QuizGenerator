@@ -18,6 +18,6 @@ export class Quiz {
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @ManyToOne(() => Data, (data) => data.quizzes)
+  @ManyToOne(() => Data, (data) => data.quizzes, { onDelete: 'CASCADE' })
   data: Data;
 }

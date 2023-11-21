@@ -18,9 +18,14 @@ export class DataController {
     return this.dataService.createData(createDatumDto);
   }
 
-  @Get('/:id')
-  getDataById(@Param('id') id: number) : Promise<Data> {
-    return this.dataService.getDataById(id);
+  @Get('/:userid')
+  getDataByUser(@Param('userid') userid: number) : Promise<Data[]> {
+    return this.dataService.getDataByUser(userid);
+  }
+
+  @Get('/:userid/:categoryid')
+  getDataByCategory(@Param('userid') userid: number, @Param('categoryid')  categoryid: number,) : Promise<Data []> {
+    return this.dataService.getDataByCategory(userid, categoryid);
   }
 
   @Delete('/:id')

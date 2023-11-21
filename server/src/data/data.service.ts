@@ -27,7 +27,8 @@ export class DataService {
       type: type,
       dataTitle: dataTitle,
       quizNum: quizNum,
-      user: { id: uid?.id },
+      user: uid,
+      category: null,
     })
 
     const createdData = await this.dataRepository.save(Data);
@@ -39,23 +40,26 @@ export class DataService {
         data: createdData,
       })
     }
-
     return Data;
   }
 
-  async getDataById(id: number): Promise<Data> {
-    const found = await this.dataRepository.findOneBy({id:id});
-    if (!found) {
-      return null;
-    }
-    return found;
+  async getDataByUser(userid: number): Promise<Data []> {
+    const user = await this.authService.getUserById(userid);
+    const found = user ? await this.dataRepository.find({where : {user: { id : user.id }}}) : null;
+    return found || [];
+  }
+
+  async getDataByCategory(userid: number, categoryid: number): Promise<Data []> {
+    const user = await this.authService.getUserById(userid);
+    const found = user ? await this.dataRepository.find({where : {user: { id : user.id }} && {category: { id : categoryid}}}) : null;
+    return found || [];
   }
 
   async deleteDataById(id: number): Promise<boolean>{
     const result = await this.dataRepository.delete(id);
   
     if (result.affected === 0) {
-      return false;
+      return false; 
     }
     return true;
   }

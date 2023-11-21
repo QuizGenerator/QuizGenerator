@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { QuizRepository } from './quiz.repository';
-import { DataService } from 'src/data/data.service';
 
 @Injectable()
 export class QuizService {
@@ -16,7 +14,7 @@ export class QuizService {
     const Quiz = this.quizRepository.create({
       quizText: quizText,
       quizAnswer: quizAnswer,
-      data: { id : data?.id },
+      data: data,
     })
 
     await this.quizRepository.save(Quiz);
