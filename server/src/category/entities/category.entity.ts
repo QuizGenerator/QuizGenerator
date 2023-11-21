@@ -30,6 +30,6 @@ export class Category {
   @ManyToOne(() => User, (user) => user.categories)
   user: User;
 
-  @OneToMany(() => Data, (data) => data.category, { nullable: true , cascade: ['soft-remove']})
+  @OneToMany(() => Data, (data) => data.category, { nullable: true, cascade: ['soft-remove'] })
   datas: Data[];
 }

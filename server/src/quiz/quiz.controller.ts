@@ -13,7 +13,6 @@ export class QuizController {
     return this.quizService.createQuiz(createQuizDto);
   }
 
-
   // @Post()
   // create(@Body() createQuizDto: CreateQuizDto) {
   //   return this.quizService.create(createQuizDto);

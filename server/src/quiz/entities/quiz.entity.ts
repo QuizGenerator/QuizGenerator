@@ -19,5 +19,5 @@ export class Quiz {
   deletedAt: Date | null;
 
   @ManyToOne(() => Data, (data) => data.quizzes)
-  data: Data
+  data: Data;
 }

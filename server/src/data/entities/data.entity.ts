@@ -45,4 +45,4 @@ export class Data {
 
   @ManyToOne(() => Category, (category) => category.datas, { nullable: true })
   category: Category;
-} 
+}
