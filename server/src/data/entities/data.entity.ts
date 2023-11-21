@@ -37,12 +37,12 @@ export class Data {
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @OneToMany(() => Quiz, (quiz) => quiz.data, { cascade: ['remove'] })
+  @OneToMany(() => Quiz, (quiz) => quiz.data, { cascade: ['soft-remove'] })
   quizzes: Quiz[];
 
-  @ManyToOne(() => User, (user) => user.datas)
+  @ManyToOne(() => User, (user) => user.datas, { cascade: true })
   user: User;
 
-  @ManyToOne(() => Category, (category) => category.datas)
+  @ManyToOne(() => Category, (category) => category.datas, { nullable: true })
   category: Category;
 } 

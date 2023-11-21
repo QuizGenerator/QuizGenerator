@@ -2,18 +2,15 @@ import { Module } from '@nestjs/common';
 import { DataService } from './data.service';
 import { DataController } from './data.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataRepository } from './data.repository';
 import { Data } from './entities/data.entity'
 import { QuizModule } from 'src/quiz/quiz.module';
-import { QuizService } from 'src/quiz/quiz.service';
-import { QuizRepository } from 'src/quiz/quiz.repository';
-import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entities/user.entity';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Data]) ,QuizModule],
+  imports: [TypeOrmModule.forFeature([Data, User]) ,QuizModule, UserModule],
   exports: [DataService],
   controllers: [DataController],
-  providers: [DataService, DataRepository, QuizService, QuizRepository],
+  providers: [DataService],
 })
 export class DataModule {}
