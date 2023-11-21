@@ -33,9 +33,9 @@ export class User {
   @DeleteDateColumn({ type: 'timestamp', name: 'deleted_at', nullable: true })
   deletedAt: Date | null;
 
-  @OneToMany(() => Category, (category) => category.user, { nullable: true })
+  @OneToMany(() => Category, (category) => category.user, { nullable: true, cascade: ['soft-remove'] })
   categories: Category[] | null;
 
-  @OneToMany(() => Data, (data) => data.user, { nullable: true })
+  @OneToMany(() => Data, (data) => data.user, { nullable: true, cascade: ['soft-remove'] })
   datas: Data[] | null;
 }
