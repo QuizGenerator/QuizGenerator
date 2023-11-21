@@ -46,4 +46,12 @@ export class UserService {
     });
     console.log(row);
   }
+
+  // async getUserById(id: number): Promise<User> {
+  //   const found = await this.userRepository.findOneBy({id:id});
+  //   if (!found) {
+  //     return null;
+  //   }
+  //   return found;
+  // }
 }

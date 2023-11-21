@@ -6,22 +6,27 @@ import { Data } from "./entities/data.entity"
 
 @Controller('data')
 export class DataController {
-  constructor(private dataService: DataService) {}
+  constructor(private readonly dataService: DataService) {}
 
   // @Post()
   // create(@Body() createDatumDto: CreateDatumDto) {
   //   return this.dataService.create(createDatumDto);
   // }
 
-  @Post()
-  createData(@Body() createDatumDto: CreateDatumDto): Promise<Data> {
-    return this.dataService.createData(createDatumDto);
-  }
+  // @Post()
+  // createData(@Body() createDatumDto: CreateDatumDto): Promise<Data> {
+  //   return this.dataService.createData(createDatumDto);
+  // }
 
-  @Get('/:id')
-  getDataById(@Param('id') id: number) : Promise<Data> {
-    return this.dataService.getDataById(id);
-  }
+  // @Get('/:userid')
+  // getDataByUser(@Param('userid') userid: number) : Promise<Data[]> {
+  //   return this.dataService.getDataByUser(userid);
+  // }
+
+  // @Get('/:userid/:categoryid')
+  // getDataByCategory(@Param('userid') userid: number, @Param('categoryid')  categoryid: number,) : Promise<Data []> {
+  //   return this.dataService.getDataByCategory(userid, categoryid);
+  // }
 
   @Delete('/:id')
   deleteDataById(@Param('id') id: number) : Promise<boolean>{

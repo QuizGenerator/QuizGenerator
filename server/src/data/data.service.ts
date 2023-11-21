@@ -2,42 +2,69 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDatumDto } from './dto/create-datum.dto';
 import { DataRepository } from './data.repository';
 import { Data } from "./entities/data.entity"
+import { UserService } from 'src/user/user.service';
+import { QuizService } from 'src/quiz/quiz.service';
 
 @Injectable()
 export class DataService {
 
   constructor(
     private dataRepository: DataRepository,
+    // private userService: UserService,
+    private quizService: QuizService,
   ){}
 
-  async createData(createDatumDto: CreateDatumDto): Promise <Data> {
-    const {inputText, difficulty, type, dataTitle, quizNum, quizzes} = createDatumDto;
+  // async createData(createDatumDto: CreateDatumDto): Promise <Data> {
+  //   const {inputText, difficulty, type, dataTitle, quizNum, quizzes, user} = createDatumDto;
+  //   const uid = await this.userService.getUserById(user);
+  //   if(uid === null){
+  //     return null;
+  //   }
 
-    const Data = this.dataRepository.create({
-      inputText: inputText,
-      difficulty: difficulty,
-      type: type,
-      dataTitle: dataTitle,
-      quizNum: quizNum,
-      quizzes: quizzes,
-    })
-    await this.dataRepository.save(Data);
-    return Data;
-  }
+  //   const Data = await this.dataRepository.create({
+  //     inputText: inputText,
+  //     difficulty: difficulty,
+  //     type: type,
+  //     dataTitle: dataTitle,
+  //     quizNum: quizNum,
+  //     user: uid,
+  //     category: null,
+  //   })
 
-  async getDataById(id: number): Promise<Data> {
-    const found = await this.dataRepository.findOneBy({id:id});
-    if (!found) {
-      return null;
-    }
-    return found;
-  }
+  //   const createdData = await this.dataRepository.save(Data);
+
+  //   for(const quiz of quizzes){
+  //     await this.quizService.createQuiz({
+  //       quizText: quiz.quizText,
+  //       quizAnswer: quiz.quizAnswer,
+  //       data: createdData,
+  //     })
+  //   }
+  //   return Data;
+  // }
+
+  // async getDataByUser(userid: number): Promise<Data []> {
+  //   const user = await this.userService.getUserById(userid);
+  //   const found = user ? await this.dataRepository.find({where : {user: { id : user.id }}}) : null;
+  //   return found || [];
+  // }
+
+  // async getDataByCategory(userid: number, categoryid: number): Promise<Data []> {
+  //   const user = await this.userService.getUserById(userid);
+  //   const found = await this.dataRepository.find({
+  //     where: {
+  //       user: { id: user.id },
+  //       category: { id: categoryid },
+  //     },
+  //   });
+  //   return found || [];
+  // }
 
   async deleteDataById(id: number): Promise<boolean>{
     const result = await this.dataRepository.delete(id);
   
     if (result.affected === 0) {
-      return false;
+      return false; 
     }
     return true;
   }

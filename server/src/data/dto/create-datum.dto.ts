@@ -1,4 +1,4 @@
-class quizDto {
+class quiz{
     quizText: string;
     quizAnswer: string;
 }
@@ -9,6 +9,6 @@ export class CreateDatumDto {
     type: string;
     dataTitle: string;
     quizNum: number;
-    quizzes: quizDto[];
-    user: string;
+    quizzes: quiz[];
+    user: number;
 }
