@@ -44,7 +44,6 @@ export class UserService {
       },
       where: { id: id },
     });
-    console.log(row);
   }
 
   async getUserById(id: number): Promise<User> {

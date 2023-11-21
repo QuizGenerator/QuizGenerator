@@ -1,7 +1,5 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import * as bcrypt from 'bcrypt';
@@ -36,6 +34,7 @@ export class AuthService {
 
     const payload = { sub: user.id, account: user.account };
     const accessToken = await this.jwtService.signAsync(payload);
+    console.log(accessToken);
     const result: LoginResultType = {
       accessToken: accessToken,
       cookieOption: this.getCookieOption(),
