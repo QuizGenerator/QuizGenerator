@@ -44,6 +44,5 @@ export class UserService {
       },
       where: { id: id },
     });
-    console.log(row);
   }
 }

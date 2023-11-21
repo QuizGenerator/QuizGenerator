@@ -1,10 +1,13 @@
-import { Body, Controller, Post, Get, Param, Res } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UserService } from 'src/user/user.service';
 import { LoginResultType } from './interface/login-result.interface';
 import { CookieOptions, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/user/entities/user.entity';
+import { GetUser } from 'src/decorator/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -15,20 +18,17 @@ export class AuthController {
 
   @Post('signin')
   async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) res: Response) {
-    const loginRes: LoginResultType = await this.authService.signIn(signInDto.userId, signInDto.password);
+    const loginRes: LoginResultType = await this.authService.signIn(signInDto.account, signInDto.password);
     res.cookie('AccessToken', loginRes.accessToken, loginRes.cookieOption);
-    return;
+    return true;
   }
 
   @Post('signup')
   async signUp(@Body() signUpDto: SignUpDto): Promise<boolean> {
-    console.log(signUpDto);
-    console.log(typeof signUpDto.account);
     const signUp: SignUpDto = new SignUpDto();
     signUp.account = signUpDto.account;
     signUp.password = signUpDto.password;
     signUp.name = signUpDto.name;
-    console.log(signUp);
     return await this.authService.signUp(signUp);
   }
 
@@ -41,9 +41,9 @@ export class AuthController {
       throw error;
     }
   }
-
   @Get()
-  test() {
-    this.userService.getUserInfo(3);
+  @UseGuards(AuthGuard())
+  test(@GetUser() user: User) {
+    console.log(user);
   }
 }
