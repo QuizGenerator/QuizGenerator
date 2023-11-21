@@ -1,7 +1,7 @@
-import { Data } from "../../data/entities/data.entity"
+import { Data } from '../../data/entities/data.entity';
 
 export class CreateQuizDto {
-    quizText: string;
-    quizAnswer: string;
-    data: Data;
+  quizText: string;
+  quizAnswer: string;
+  data: Data;
 }

@@ -6,9 +6,7 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class QuizService {
-  constructor(
-    @InjectRepository(Quiz) private readonly quizRepository: Repository<Quiz>,
-  ) { }
+  constructor(@InjectRepository(Quiz) private readonly quizRepository: Repository<Quiz>) {}
 
   async createQuiz(createQuizDto: CreateQuizDto): Promise<boolean> {
     const { quizText, quizAnswer, data } = createQuizDto;
@@ -17,7 +15,7 @@ export class QuizService {
       quizText: quizText,
       quizAnswer: quizAnswer,
       data: data,
-    })
+    });
 
     await this.quizRepository.save(Quiz);
     return true;

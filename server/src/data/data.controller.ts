@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { DataService } from './data.service';
 import { CreateDatumDto } from './dto/create-datum.dto';
-import { Data } from "./entities/data.entity"
+import { Data } from './entities/data.entity';
 
 @Controller('data')
 export class DataController {
-  constructor(private readonly dataService: DataService) { }
+  constructor(private readonly dataService: DataService) {}
 
   @Post()
   createData(@Body() createDatumDto: CreateDatumDto): Promise<Data> {
@@ -18,7 +18,7 @@ export class DataController {
   }
 
   @Get('/:userid/:categoryid')
-  getDataByCategory(@Param('userid') userid: number, @Param('categoryid') categoryid: number,): Promise<Data[]> {
+  getDataByCategory(@Param('userid') userid: number, @Param('categoryid') categoryid: number): Promise<Data[]> {
     return this.dataService.getDataByCategory(userid, categoryid);
   }
 
