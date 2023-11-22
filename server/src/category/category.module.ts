@@ -10,4 +10,4 @@ import { Category } from './entities/category.entity';
   controllers: [CategoryController],
   providers: [CategoryService],
 })
-export class CategoryModule {}
+export class CategoryModule { }
