@@ -1,5 +1,5 @@
 export class ReturnCategoryDto {
-    CategoryId: number;
-    Department: string;
-    DataNum: number;
+  CategoryId: number;
+  Department: string;
+  DataNum: number;
 }
