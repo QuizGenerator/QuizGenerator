@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ChangeCategoryDto } from './dto/change-category.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -16,4 +17,9 @@ export class CategoryController {
     return this.categoryService.updateCategory(id, updateCategoryDto);
   }
 
+
+  @Patch()
+  changeCategory(@Body() changeCategoryDto: ChangeCategoryDto) {
+    return this.categoryService.changeCategory(changeCategoryDto.DataID, changeCategoryDto.nextCID);
+  }
 }
