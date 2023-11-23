@@ -62,11 +62,11 @@ export class DataService {
       const user = await this.userService.getUserById(userid);
       const found = user
         ? await this.dataRepository.find({
-          where: {
-            user: { id: user.id },
-            category: { id: categoryid },
-          },
-        })
+            where: {
+              user: { id: user.id },
+              category: { id: categoryid },
+            },
+          })
         : null;
       return found || [];
     } catch (error) {
