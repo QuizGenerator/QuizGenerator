@@ -13,12 +13,12 @@ export class CategoryService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Data) private readonly dataRepository: Repository<Data>,
-  ) { }
+  ) {}
   async deleteCategoryById(id: number): Promise<ReturnCategoryDto> {
     try {
-      const data = await this.categoryRepository.find({ where: { id: id }, relations: { datas: { quizzes: true } } })
+      const data = await this.categoryRepository.find({ where: { id: id }, relations: { datas: { quizzes: true } } });
       const result = await this.categoryRepository.softRemove(data);
-      return ({ CategoryId: result[0].id, Department: result[0].department, DataNum: result[0].dataNum });
+      return { CategoryId: result[0].id, Department: result[0].department, DataNum: result[0].dataNum };
     } catch (error) {
       throw error;
     }
@@ -26,15 +26,15 @@ export class CategoryService {
 
   async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<ReturnCategoryDto> {
     try {
-      const { department } = updateCategoryDto
+      const { department } = updateCategoryDto;
       await this.categoryRepository
         .createQueryBuilder()
         .update(Category)
         .set({ department: department })
         .where({ id: id })
-        .execute()
-      const category = await this.categoryRepository.find({ where: { id: id } })
-      return ({ CategoryId: category[0].id, Department: category[0].department, DataNum: category[0].dataNum });
+        .execute();
+      const category = await this.categoryRepository.find({ where: { id: id } });
+      return { CategoryId: category[0].id, Department: category[0].department, DataNum: category[0].dataNum };
     } catch (error) {
       throw error;
     }
