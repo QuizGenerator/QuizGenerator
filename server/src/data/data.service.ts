@@ -12,7 +12,7 @@ export class DataService {
     @InjectRepository(Data) private readonly dataRepository: Repository<Data>,
     private userService: UserService,
     private quizService: QuizService,
-  ) { }
+  ) {}
 
   async createData(createDatumDto: CreateDatumDto): Promise<Data> {
     try {
