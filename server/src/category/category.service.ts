@@ -13,7 +13,7 @@ export class CategoryService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Data) private readonly dataRepository: Repository<Data>,
-  ) {}
+  ) { }
   async deleteCategoryById(id: number): Promise<ReturnCategoryDto> {
     try {
       const data = await this.categoryRepository.find({ where: { id: id }, relations: { datas: { quizzes: true } } })
@@ -27,7 +27,7 @@ export class CategoryService {
   async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<ReturnCategoryDto> {
     try {
       const { department } = updateCategoryDto
-      const result = await this.categoryRepository
+      await this.categoryRepository
         .createQueryBuilder()
         .update(Category)
         .set({ department: department })
