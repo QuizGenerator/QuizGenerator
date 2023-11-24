@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function QuizData() {
   const [quizContent, setQuizContent] = useState('');
@@ -17,6 +18,10 @@ function QuizData() {
     if (quizCount > maxQuizCount) {
       setQuizCount(maxQuizCount);
     }
+  };
+  const navigate = useNavigate();
+  const navigateToQG = () => {
+    navigate('/QuizData');
   };
 
   const handleTitleChange = (event) => {
@@ -50,7 +55,7 @@ function QuizData() {
         body: JSON.stringify({
           model: "text-davinci-003", // 사용할 모델
           prompt: prompt,
-          max_tokens: 1000, // 응답의 길이 제한
+          max_tokens: 2000, // 응답의 길이 제한
         }),
       });
   
@@ -98,6 +103,24 @@ function QuizData() {
       <span style={{ marginLeft: '10px' }}>퀴즈 최대 갯수: {maxQuizCount}</span>
     </div>
   );
+  const navigateToQGBtnStyle = {
+    // 배치
+    position: 'absolute',
+    top: 0, // 좌측에 위치
+    left: 0, // 좌측에 위치
+    padding: '20px',
+    display: 'flex',
+    zIndex: 10, // orangeShapeStyle 위에 위치
+    // 디자인
+    background: 'transparent',
+    color: '#FF9800',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    fontSize: '50px'
+  };
 
   const mainContainerStyle = {
     position: 'relative', // 상대 위치
@@ -109,17 +132,19 @@ function QuizData() {
     fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
   };
 
+
   const orangeShapeStyle = {
     position: 'absolute', // 절대 위치
-    top: '15%', // 상단으로부터 20% 떨어짐
+    top: '10%', // 상단으로부터 20% 떨어짐
     left: '50%', // 좌우 가운데 정렬을 위해 왼쪽에서 50% 위치
     transform: 'translateX(-50%)', // X축 기준으로 -50% 이동하여 가운데 정렬
-    width: '55%', // 너비 65%
-    height: '60%', // 높이 40%
+    width: '65%', // 너비 65%
+    height: '85%', // 높이 40%
     backgroundColor: '#FFC107', // 주황색 배경
     borderRadius: '100px', // 둥근 모서리
     zIndex: -1, // 내용 뒤에 위치
   };
+
 
   const contentContainerStyle = {
     backgroundColor: 'white',
@@ -149,13 +174,43 @@ function QuizData() {
     marginLeft: '20px',
 
   };
+  const topRightContainerStyle = {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    zIndex: 10 // 다른 요소들 위에 위치
+  };
+  const welcomeTextStyle = {
+    marginRight: '10px',
+    fontSize: '20px',
+    color: 'black'
+  };
+
+  const logoutButtonStyle = {
+    background: '#FF9800',
+    color: 'white',
+    padding: '5px 15px',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer'
+  };
 
   return (
     <div style={mainContainerStyle}>
+       <button onClick={navigateToQG} style={navigateToQGBtnStyle}>
+        QG
+      </button>
       <div style={orangeShapeStyle}></div>
+      <div style={topRightContainerStyle}>
+        <div style={welcomeTextStyle}>UserName님 환영합니다.</div>
+        <button style={logoutButtonStyle}>로그아웃</button>
+      </div>
       <h1 style={{
         position: 'absolute',
-        top: '20%',
+        top: '13%',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 10
