@@ -1,20 +1,64 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function SignUpPage() {
-  const [id, setId] = useState('');
+  const [account, setAccount] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isIdChecked, setIsIdChecked] = useState(false);
+  const navigate = useNavigate();
 
   const handleSignUp = () => {
-    // Sign-up logic goes here
-    console.log('Signing up with:', id, name, password, confirmPassword);
+    if (password !== confirmPassword) {
+      console.log('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    if (!isIdChecked) {
+      console.log('ID 중복 확인이 필요합니다.');
+      return;
+    }
+  
+    axios.post('auth/signup', { account, password, name })
+      .then(response => {
+        if (response.data === true) {
+          console.log('회원가입 성공');
+          navigateTologin();
+        } else {
+          console.log('회원가입 실패');
+          // 회원가입 실패 처리
+        }
+      })
+      .catch(error => {
+        console.error('회원가입 중 에러 발생:', error);
+        // 에러 처리
+      });
   };
 
   const checkDuplicateId = () => {
-    // Logic for checking duplicate IDs goes here
-    console.log('Checking ID for duplicates:', id);
+    axios.get(`auth/check?account=${account}`)
+      .then(response => {
+        console.log('응답:', response.data);
+        if (response.data === true) {
+          alert('ID가 중복됩니다.'); 
+          setIsIdChecked(false);
+        } else {
+          alert('사용 가능한 ID입니다.');
+          setIsIdChecked(true);
+        }
+      })
+      .catch(error => {
+        console.error('ID 중복 확인 중 에러 발생:', error);
+      alert('ID 중복 확인 중 문제가 발생했습니다.');
+      setIsIdChecked(false);
+      });
   };
+  
+  const navigateTologin = () => {
+    navigate('/login');
+  };
+  
 
   return (
     <div style={{ background: '#FFC107', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -26,8 +70,8 @@ function SignUpPage() {
           <input
             type="text"
             id="id"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
             placeholder="ID"
             style={{ width: '100%', padding: '10px', paddingRight: '85px', borderRadius: 4, border: '1px solid #ddd', boxSizing: 'border-box' }}
           />
