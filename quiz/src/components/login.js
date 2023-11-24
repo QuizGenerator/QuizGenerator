@@ -8,7 +8,8 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    axios.post('/auth/signin/', { account, password })
+    console.log("login clicked");
+    axios.post('auth/signin', { account, password })
       .then(response => {
         console.log('로그인 성공:', response.data);
 
