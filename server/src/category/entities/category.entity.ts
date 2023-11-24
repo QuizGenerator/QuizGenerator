@@ -9,9 +9,19 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ReturnCategoryDto } from '../dto/return-category.dto';
 
 @Entity()
 export class Category {
+  createDto() {
+    const returnCategoryDto = new ReturnCategoryDto();
+    returnCategoryDto.DataNum = this.dataNum;
+    returnCategoryDto.CategoryId = this.id;
+    returnCategoryDto.Department = this.department;
+
+    return returnCategoryDto;
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 

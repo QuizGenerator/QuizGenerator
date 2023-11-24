@@ -8,6 +8,7 @@ import { CookieOptions, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/user/entities/user.entity';
 import { GetUser } from 'src/decorator/get-user.decorator';
+import { ReturnSignInDto } from './dto/return-sign-in.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +21,7 @@ export class AuthController {
   async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) res: Response) {
     const loginRes: LoginResultType = await this.authService.signIn(signInDto.account, signInDto.password);
     res.cookie('AccessToken', loginRes.accessToken, loginRes.cookieOption);
-    return true;
+    return await this.authService.returnSignIn(loginRes.user);
   }
 
   @Post('signup')
