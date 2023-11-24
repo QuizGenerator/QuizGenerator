@@ -52,7 +52,6 @@ export class CategoryService {
         .set({ category: nextCategory })
         .where('id = :id', { id: dataID })
         .execute();
-      console.log(results);
     } catch (error) {
       throw error;
     }
@@ -61,7 +60,6 @@ export class CategoryService {
   async createCategory(userID: number, department: string) {
     try {
       const rows: User[] = await this.userRepository.find({ where: { id: userID } });
-      console.log(rows);
       const user = rows[0];
 
       await this.categoryRepository
@@ -73,5 +71,15 @@ export class CategoryService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async getCategories(userID: number): Promise<ReturnCategoryDto[]> {
+    const rows2: Category[] = await this.categoryRepository.find({ where: { user: { id: userID } } });
+    const returnCategoryDto: ReturnCategoryDto[] = rows2.map((category: Category) => {
+      return category.createDto();
+    });
+
+    console.log(returnCategoryDto);
+    return returnCategoryDto;
   }
 }
