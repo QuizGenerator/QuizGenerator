@@ -20,7 +20,7 @@ export class AuthController {
   @Post('signin')
   async signIn(@Body() signInDto: SignInDto, @Res({ passthrough: true }) res: Response) {
     const loginRes: LoginResultType = await this.authService.signIn(signInDto.account, signInDto.password);
-    res.cookie('AccessToken', loginRes.accessToken, loginRes.cookieOption);
+    res.header('AccessToken', loginRes.accessToken);
     return await this.authService.returnSignIn(loginRes.user);
   }
 
