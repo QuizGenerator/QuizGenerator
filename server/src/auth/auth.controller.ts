@@ -4,11 +4,10 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { UserService } from 'src/user/user.service';
 import { LoginResultType } from './interface/login-result.interface';
-import { CookieOptions, Response } from 'express';
+import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/user/entities/user.entity';
-import { GetUser } from 'src/decorator/get-user.decorator';
-import { ReturnSignInDto } from './dto/return-sign-in.dto';
+import { getUserId } from 'src/decorator/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -44,7 +43,7 @@ export class AuthController {
   }
   @Get()
   @UseGuards(AuthGuard())
-  test(@GetUser() user: User) {
-    console.log(user);
+  test(@getUserId() id: number) {
+    console.log(id);
   }
 }
