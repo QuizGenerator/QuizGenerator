@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { QuizService } from 'src/quiz/quiz.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class DataService {
@@ -14,11 +15,11 @@ export class DataService {
     private quizService: QuizService,
   ) {}
 
-  async createData(createDatumDto: CreateDatumDto): Promise<Data> {
+  async createData(userId: number, createDatumDto: CreateDatumDto): Promise<Data> {
     try {
-      const { inputText, difficulty, type, dataTitle, quizNum, quizzes, user } = createDatumDto;
-      const uid = await this.userService.getUserById(user);
-      if (uid === null) {
+      const { inputText, difficulty, type, dataTitle, quizNum, quizzes } = createDatumDto;
+      const user: User = await this.userService.getUserById(userId);
+      if (user === null) {
         return null;
       }
 
@@ -28,7 +29,7 @@ export class DataService {
         type: type,
         dataTitle: dataTitle,
         quizNum: quizNum,
-        user: uid,
+        user: user,
         category: null,
       });
 
