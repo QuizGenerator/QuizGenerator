@@ -1,31 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ChangeCategoryDto } from './dto/change-category.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { getUserId } from 'src/decorator/get-user.decorator';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.categoryService.deleteCategoryById(id);
+  @Delete(':categoryID')
+  @UseGuards(AuthGuard())
+  remove(@Param('categoryID') categoryId: number) {
+    return this.categoryService.deleteCategoryById(categoryId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: number, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryService.updateCategory(id, updateCategoryDto);
+  @Patch(':categoryID')
+  @UseGuards(AuthGuard())
+  update(@Param('categoryID') categoryId: number, @Body() updateCategoryDto: UpdateCategoryDto) {
+    return this.categoryService.updateCategory(categoryId, updateCategoryDto);
   }
 
   @Patch()
+  @UseGuards(AuthGuard())
   changeCategory(@Body() changeCategoryDto: ChangeCategoryDto) {
     return this.categoryService.changeCategory(changeCategoryDto.DataID, changeCategoryDto.nextCID);
   }
 
-  @Post(':userID')
-  createCategory(@Param('userID') userID: number, @Body() createCategoryDto: CreateCategoryDto) {
-    console.log('controller');
+  @Post()
+  @UseGuards(AuthGuard())
+  createCategory(@getUserId() userID: number, @Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.createCategory(userID, createCategoryDto.Department);
   }
 }

@@ -1,29 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { DataService } from './data.service';
 import { CreateDatumDto } from './dto/create-datum.dto';
 import { Data } from './entities/data.entity';
+import { getUserId } from 'src/decorator/get-user.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('data')
 export class DataController {
   constructor(private readonly dataService: DataService) {}
 
   @Post()
-  createData(@Body() createDatumDto: CreateDatumDto): Promise<Data> {
-    return this.dataService.createData(createDatumDto);
+  @UseGuards(AuthGuard())
+  createData(@getUserId() userId: number, @Body() createDatumDto: CreateDatumDto): Promise<Data> {
+    return this.dataService.createData(userId, createDatumDto);
   }
 
-  @Get('/:userid')
-  getDataByUser(@Param('userid') userid: number): Promise<Data[]> {
+  @Get()
+  @UseGuards(AuthGuard())
+  getDataByUser(@getUserId() userid: number): Promise<Data[]> {
     return this.dataService.getDataByUser(userid);
   }
 
-  @Get('/:userid/:categoryid')
-  getDataByCategory(@Param('userid') userid: number, @Param('categoryid') categoryid: number): Promise<Data[]> {
-    return this.dataService.getDataByCategory(userid, categoryid);
+  @Get('/:categoryID')
+  @UseGuards(AuthGuard())
+  getDataByCategory(@getUserId() userid: number, @Param('categoryID') categoryId: number): Promise<Data[]> {
+    return this.dataService.getDataByCategory(userid, categoryId);
   }
 
-  @Delete('/:id')
-  deleteDataById(@Param('id') id: number): Promise<boolean> {
-    return this, this.dataService.deleteDataById(id);
+  @Delete('/:dataID')
+  @UseGuards(AuthGuard())
+  deleteDataById(@Param('dataID') dataId: number): Promise<boolean> {
+    return this, this.dataService.deleteDataById(dataId);
   }
 }
