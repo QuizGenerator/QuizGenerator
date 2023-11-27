@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Res, UseGuards, NotFoundException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -32,10 +32,11 @@ export class AuthController {
     return await this.authService.signUp(signUp);
   }
 
-  @Get('check')
-  checkAccount(@Param('account') account: string): boolean {
+  @Get('check/:account')
+  async checkAccount(@Param('account') account: string): Promise<boolean> {
     try {
-      this.userService.findbyAccount(account);
+      const user: User = await this.userService.findbyAccount(account);
+      if (user === undefined) throw new NotFoundException();
       return true;
     } catch (error) {
       throw error;

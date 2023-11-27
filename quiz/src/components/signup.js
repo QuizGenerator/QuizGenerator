@@ -23,21 +23,20 @@ function SignUpPage() {
     axios.post('auth/signup', { account, password, name })
       .then(response => {
         if (response.data === true) {
-          console.log('회원가입 성공');
+          alert('회원가입 성공');
           navigateTologin();
         } else {
-          console.log('회원가입 실패');
-          // 회원가입 실패 처리
+          alert('회원가입 실패');
         }
       })
       .catch(error => {
         console.error('회원가입 중 에러 발생:', error);
-        // 에러 처리
+        alert('회원가입중 에러 발생');
       });
   };
 
   const checkDuplicateId = () => {
-    axios.get(`auth/check?account=${account}`)
+    axios.get(`auth/check/${account}`)
       .then(response => {
         console.log('응답:', response.data);
         if (response.data === true) {
@@ -50,10 +49,16 @@ function SignUpPage() {
       })
       .catch(error => {
         console.error('ID 중복 확인 중 에러 발생:', error);
-      alert('ID 중복 확인 중 문제가 발생했습니다.');
-      setIsIdChecked(false);
+        if (error.response && error.response.status === 404) {
+          alert('ID 사용이 가능합니다.');
+          setIsIdChecked(true);
+        } else {
+          alert('ID 중복 확인 중 문제가 발생했습니다.');
+          setIsIdChecked(false);
+        }
       });
   };
+  
   
   const navigateTologin = () => {
     navigate('/login');
