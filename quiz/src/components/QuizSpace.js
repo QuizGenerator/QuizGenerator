@@ -3,10 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 
-const QuizItem = ({ title, difficulty, questionCount, questionType, date, onChangeCategory, onDelete }) => {
+const QuizItem = ({ title, difficulty, questionCount, questionType, date, dataId, onChangeCategory, onDelete, onItemClick }) => {
   // 난이도 라벨 정의
   const difficultyLabels = { 'Hard': '상', 'Medium': '중', 'Easy': '하' };
-  
+  const handleButtonClick = (event, action) => {
+    event.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
+    action();
+  };
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    if (window.confirm('퀴즈를 삭제하시겠습니까?')) {
+      onDelete(dataId); // 상위 컴포넌트에 삭제 요청 전달
+    }
+  };
   const quizItemStyle = {
     display: 'flex',
     justifyContent: 'space-between',
@@ -18,7 +28,8 @@ const QuizItem = ({ title, difficulty, questionCount, questionType, date, onChan
     flexGrow: 1, // flex-grow 속성 추가
     whiteSpace: 'nowrap', // 줄바꿈 방지
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 그림자 효과 추가
-    minWidth: '550px'
+    minWidth: '550px',
+    cursor: 'pointer',
   };
   const deleteBtnStyle = {
     border: 'none',
@@ -40,19 +51,20 @@ const QuizItem = ({ title, difficulty, questionCount, questionType, date, onChan
   };
 
   return (
-    <div style={quizItemStyle}>
+    <div style={quizItemStyle} onClick={() => onItemClick(dataId)}>
       <div style={{ marginRight: '40px' }}>
         <div style={{ fontWeight: 'bold' }}>{title}</div>
-        <div>난이도: {difficultyLabels[difficulty]} | {questionCount}문제 | {questionType === 'multiple-choice' ? '객관식' : '주관식'}</div>
+        <div>난이도: {difficultyLabels[difficulty]} | {questionCount}문제 | {questionType === '객관식' ? '객관식' : '주관식'}</div>
       </div>
       <div style={{ marginRight: '50px' }}>{date}</div>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <button onClick={onChangeCategory} style={categoryChangeBtnStyle}>
+      <button onClick={(e) => handleButtonClick(e, onChangeCategory)} style={categoryChangeBtnStyle}>
           카테고리 변경
         </button>
-        <button onClick={onDelete} style={deleteBtnStyle}>
-          삭제
-        </button>
+        <button onClick={handleDeleteClick} style={deleteBtnStyle}>
+  삭제
+</button>
+        
       </div>
     </div>
   );
@@ -70,6 +82,29 @@ const QuizSpace = () => {
     updateAuthInfo({ name: '', accessToken: '', categories: [] });
     navigate('/login');
   }
+
+  const handleDelete = async (dataId) => {
+    if (!dataId) {
+      console.error('dataId is undefined');
+      return;
+    }
+    try {
+      const response = await axios.delete(`/data/${dataId}`, {
+        headers: {
+          "Authorization": `Bearer ${authInfo.accessToken}`
+        }
+      });
+      if (response.data) {
+        // 삭제 성공 시 퀴즈 목록에서 제거
+        setQuizzes(quizzes.filter(quiz => quiz.dataId !== dataId));
+      } else {
+        console.error('퀴즈 삭제 실패');
+      }
+    } catch (error) {
+      console.error('퀴즈 삭제 중 오류 발생:', error);
+    }
+  };
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -84,8 +119,11 @@ const QuizSpace = () => {
           difficulty: quiz.Difficulty, // API에서 제공하는 난이도 값 사용
           questionCount: quiz.QuizNum,
           questionType: quiz.Type,
-          date: new Date(quiz.created_at).toLocaleDateString() // 날짜 형식 조정
+          date: new Date(quiz.created_at).toLocaleDateString() + ' ' + new Date(quiz.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+
+          dataId : quiz.dataId
         }));
+        console.log(response.data);
         setQuizzes(fetchedQuizzes);
       } catch (error) {
         console.error('데이터 가져오기 실패:', error);
@@ -94,6 +132,12 @@ const QuizSpace = () => {
 
     fetchData();
   }, [authInfo.accessToken, navigate]);
+  const handleQuizItemClick = (dataId) => {
+    console.log("Data ID" , dataId);
+    // destination 페이지로 이동하면서 dataID를 URL 매개변수로 전달
+    navigate(`/destination/${dataId}`);
+  };
+
   
 
   const [activeTab, setActiveTab] = useState('미분류');
@@ -125,9 +169,7 @@ const QuizSpace = () => {
   };
 
 
-  const handleDelete = (quizTitle) => {
-    setQuizzes(quizzes.filter(quiz => quiz.title !== quizTitle));
-  };
+  
 
   // 카테고리 변경 핸들러 (예시)
   const handleChangeCategory = (quizTitle) => {
@@ -414,7 +456,8 @@ const QuizSpace = () => {
               questionType={quiz.questionType}
               date={quiz.date}
               onChangeCategory={() => openChangeCategoryModal(quiz.title)}
-              onDelete={() => handleDelete(quiz.title)}
+              onDelete={()=> handleDelete(quiz.dataId)}
+              onItemClick={() => handleQuizItemClick(quiz.dataId)}
             />
           ))}
         </div>
