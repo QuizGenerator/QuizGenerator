@@ -26,17 +26,16 @@ export class QuizService {
     }
   }
 
-  async getQuizById(dataId:number):Promise<ReturnQuizDto[]>{
-    try{
+  async getQuizById(dataId: number): Promise<ReturnQuizDto[]> {
+    try {
+      const rows: Quiz[] = await this.quizRepository.find({ where: { data: { id: dataId } } });
 
-      const rows : Quiz[] = await this.quizRepository.find({where:{data: {id: dataId}}});
-
-      const result : ReturnQuizDto[] = rows.map((quiz)=> {
+      const result: ReturnQuizDto[] = rows.map((quiz) => {
         return quiz.createDto();
-      })
-      
+      });
+
       return result;
-    } catch (error){
+    } catch (error) {
       throw error;
     }
   }

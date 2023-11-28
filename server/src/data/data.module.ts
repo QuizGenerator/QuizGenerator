@@ -6,9 +6,15 @@ import { Data } from './entities/data.entity';
 import { QuizModule } from 'src/quiz/quiz.module';
 import { User } from 'src/user/entities/user.entity';
 import { UserModule } from 'src/user/user.module';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Data, User]), QuizModule, UserModule],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    TypeOrmModule.forFeature([Data, User]),
+    QuizModule,
+    UserModule,
+  ],
   exports: [DataService],
   controllers: [DataController],
   providers: [DataService],

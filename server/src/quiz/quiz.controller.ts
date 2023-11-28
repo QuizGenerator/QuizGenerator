@@ -12,10 +12,10 @@ export class QuizController {
   createQuiz(@Body() createQuizDto: CreateQuizDto): Promise<boolean> {
     return this.quizService.createQuiz(createQuizDto);
   }
-  
+
   @Get(':DataID')
-  // @UseGuards(AuthGuard())
-  getQuizById(@Param('DataID') dataId:number):Promise<ReturnQuizDto[]>{
+  @UseGuards(AuthGuard())
+  getQuizById(@Param('DataID') dataId: number): Promise<ReturnQuizDto[]> {
     return this.quizService.getQuizById(dataId);
   }
 }
