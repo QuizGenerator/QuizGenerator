@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function QuizData() {
   const [quizContent, setQuizContent] = useState('');
   const [title, setTitle] = useState('');
-  const [questionType, setQuestionType] = useState('multiple-choice');
+  const [questionType, setQuestionType] = useState('객관식');
   const [difficulty, setDifficulty] = useState(2);
   const [quizCount, setQuizCount] = useState(1);
-  const [generatedQuizzes, setGeneratedQuizzes] = useState('');
-  const [showModal, setShowModal] = useState(false); 
   // 최대 퀴즈 개수 계산
   const maxQuizCount = quizContent.length > 2000 ? 5 : quizContent.length > 1000 ? 4 : 3;
 
@@ -41,48 +40,67 @@ function QuizData() {
   };
 
   const handleCreateQuiz = async () => {
-    const prompt = `다음 내용을 바탕으로 ${quizCount}개의 ${questionType === 'multiple-choice' ? '객관식' : '주관식'} 
-                    문제를 생성하세요:\n난이도: ${difficultyLevels[difficulty - 1]}\n${quizContent}`;
-  
+    // const prompt = `다음 내용을 바탕으로 ${quizCount}개의 난이도: ${difficultyLevels[difficulty - 1]}인 ${questionType === 'multiple-choice' ? '객관식' : '주관식'} 문제를 다음의 형식으로 Q#.""" (객관식일 경우는 보기)도 추가\\nA#.""" 생성 해주세요:\n${quizContent}`;
+    let prompt;
+  if (questionType === '주관식') {
+    prompt = `Please create ${quizCount} subjective questions based on the following format: Q#(# is number).""" \\nA#(# is number).""" \\n Difficulty: ${difficultyLevels[difficulty-1]}\\n${quizContent}`;
+  } else if (questionType === '객관식') {
+    prompt = `Please create ${quizCount} problems based on the following. Each question must have four options and the correct answer is one of them. The problem starts with Q.(ex. Q#(# is number). Problem a, b, c, d(where a, b, c, d are options) The answer to the question is indicated by A.(ex. A#(# is number). a) Difficulty: ${difficultyLevels[difficulty -1]}\\n The content of the question is as follows:\\n “${quizContent}”\\n Note: Make sure the problem is in multiple-choice form 
+    `;
+      ;
+  }
+  console.log("GPT - PROMPT:" , prompt);
+  console.log("questionType:", questionType);
+console.log("quizCount:", quizCount);
+console.log("difficultyLevels:", difficultyLevels);
+console.log("difficulty:", difficulty);
+console.log("quizContent:", quizContent);
     try {
-      const response = await fetch("https://api.openai.com/v1/completions", {
-        method: "POST",
-        headers: {
+      const response = await axios.post("https://api.openai.com/v1/chat/completions",
+        
+        {
+          model: "gpt-3.5-turbo", // 사용할 모델
+          messages: [
+            {
+              role: 'user', // 또는 'system'을 사용할 수도 있습니다
+              content: prompt
+            }
+          ],
+          // max_tokens: 1000, // 응답의 길이 제한
+        },
+        {headers: {
           "Content-Type": "application/json",
-          // 환경 변수나 다른 방법으로 API 키를 안전하게 관리하세요
           "Authorization": `Bearer ${process.env.REACT_APP_API_KEY}`,
         },
-        body: JSON.stringify({
-          model: "text-davinci-003", // 사용할 모델
-          prompt: prompt,
-          max_tokens: 2000, // 응답의 길이 제한
-        }),
       });
-  
-      const data = await response.json();
-      setGeneratedQuizzes(data.choices.map(choice => choice.text).join("\n\n"));
-      setShowModal(true);
+      const data = response.data;
+      console.log("respone: ",response);
+      console.log("message: " ,response.data.choices[0].message);
+      const text = data.choices[0].message.content.trim();
+      const regex = /Q(\d+)\.(.*?)A\1\.(.*?)(?=(Q\d+\.|A\d+\.|$))/gs;
+      const quizzes = [];
+    
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      quizzes.push({
+        question: match[2].trim(),
+        answer: match[3].trim(),
+      });
+    }
+      console.log('GPT-3 응답 데이터:', data);
+      
       alert('퀴즈가 생성되었습니다!');
+      // navigate('/QuizSet', { state: { generatedQuizzes: data.choices.map(choice => choice.text).join("\n\n") }});
+      navigate('/QuizSet', { state: { generatedQuizzes: quizzes } });
     } catch (error) {
       console.error('GPT API 호출 중 오류 발생:', error);
       alert('퀴즈 생성에 실패했습니다.');
     }
   };
 
-  // 모달을 닫는 함수
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
+ 
 
-  // 모달 컴포넌트
-  const Modal = ({ onClose, children }) => (
-    <div style={modalStyle}>
-      <div style={modalContentStyle}>
-        <button onClick={onClose} style={closeButtonStyle}>닫기</button>
-        {children}
-      </div>
-    </div>
-  );
+
   
 
   // Define the difficulty levels
@@ -226,8 +244,8 @@ function QuizData() {
         <div style={formStyle}>
           <input type="text" value={title} onChange={handleTitleChange} placeholder="Title" style={inputStyle} />
           <select value={questionType} onChange={handleQuestionTypeChange} style={inputStyle}>
-            <option value="multiple-choice">객관식</option>
-            <option value="short-answer">주관식</option>
+            <option value="객관식">객관식</option>
+            <option value="주관식">주관식</option>
           </select>
           <div style={{ width: '100%', padding: '0', boxSizing: 'border-box' }}>
             <label htmlFor="difficulty" style={{ width: '100%', }}></label>
@@ -247,13 +265,7 @@ function QuizData() {
             Quiz 생성
           </button>
           </div>
-      {/* 생성된 퀴즈 표시 */}
-      {showModal && (
-        <Modal onClose={handleCloseModal}>
-          <h2>생성된 퀴즈:</h2>
-          <div>{generatedQuizzes}</div>
-        </Modal>
-      )}
+      
       </div>
     </div>
   );
@@ -285,32 +297,5 @@ const buttonStyle = {
 
 };
 
-// ... 기존 스타일 정의 및 추가 모달 스타일
-const modalStyle = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
-
-const modalContentStyle = {
-  backgroundColor: 'white',
-  padding: '20px',
-  borderRadius: '10px',
-};
-
-const closeButtonStyle = {
-  position: 'absolute',
-  top: '10px',
-  right: '10px',
-  border: 'none',
-  backgroundColor: 'transparent',
-  cursor: 'pointer',
-};
 
 export default QuizData;

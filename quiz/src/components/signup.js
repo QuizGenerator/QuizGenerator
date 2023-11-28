@@ -20,7 +20,7 @@ function SignUpPage() {
       return;
     }
   
-    axios.post('auth/signup', { account, password, name })
+    axios.post('/auth/signup', { account, password, name })
       .then(response => {
         if (response.data === true) {
           alert('회원가입 성공');
@@ -36,7 +36,7 @@ function SignUpPage() {
   };
 
   const checkDuplicateId = () => {
-    axios.get(`auth/check/${account}`)
+    axios.get(`/auth/check/${account}`)
       .then(response => {
         console.log('응답:', response.data);
         if (response.data === true) {
