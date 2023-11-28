@@ -14,12 +14,16 @@ import { ReturnDataDto } from '../dto/return-data.dto';
 
 @Entity('Data')
 export class Data {
-  createDto() {
+  createDto(): ReturnDataDto {
     const returnDataDto = new ReturnDataDto();
     returnDataDto.dataId = this.id;
     returnDataDto.DataTitle = this.dataTitle;
     returnDataDto.Difficulty = this.difficulty;
     returnDataDto.QuizNum = this.quizNum;
+    returnDataDto.Type = this.type;
+    returnDataDto.created_at = this.createdAt;
+    returnDataDto.inputText = this.inputText;
+    return returnDataDto;
   }
 
   @PrimaryGeneratedColumn()

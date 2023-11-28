@@ -6,6 +6,7 @@ import { QuizService } from 'src/quiz/quiz.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
+import { ReturnDataDto } from './dto/return-data.dto';
 
 @Injectable()
 export class DataService {
@@ -48,14 +49,14 @@ export class DataService {
     }
   }
 
-  async getDataByUser(userid: number): Promise<Data[]> {
+  async getDataByUser(userid: number): Promise<ReturnDataDto> {
     try {
       const user = await this.userService.getUserById(userid);
       const found = user ? await this.dataRepository.find({ where: { user: { id: user.id } } }) : null;
 
       const data: Data = found[0];
-
-      return found || [];
+      const returnDataDto: ReturnDataDto = data.createDto();
+      return returnDataDto;
     } catch (error) {
       throw error;
     }

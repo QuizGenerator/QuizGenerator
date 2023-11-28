@@ -4,6 +4,7 @@ import { CreateDatumDto } from './dto/create-datum.dto';
 import { Data } from './entities/data.entity';
 import { getUserId } from 'src/decorator/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { ReturnDataDto } from './dto/return-data.dto';
 
 @Controller('data')
 export class DataController {
@@ -17,7 +18,7 @@ export class DataController {
 
   @Get()
   @UseGuards(AuthGuard())
-  getDataByUser(@getUserId() userid: number): Promise<Data[]> {
+  getDataByUser(@getUserId() userid: number): Promise<ReturnDataDto> {
     return this.dataService.getDataByUser(userid);
   }
 
