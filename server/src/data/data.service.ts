@@ -4,7 +4,7 @@ import { Data } from './entities/data.entity';
 import { UserService } from 'src/user/user.service';
 import { QuizService } from 'src/quiz/quiz.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { ReturnDataDto } from './dto/return-data.dto';
 
@@ -14,9 +14,15 @@ export class DataService {
     @InjectRepository(Data) private readonly dataRepository: Repository<Data>,
     private userService: UserService,
     private quizService: QuizService,
+    private dataSource: DataSource,
   ) {}
 
   async createData(userId: number, createDatumDto: CreateDatumDto): Promise<Data> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       const { inputText, difficulty, type, dataTitle, quizNum, quizzes } = createDatumDto;
       const user: User = await this.userService.getUserById(userId);
@@ -45,7 +51,10 @@ export class DataService {
       }
       return Data;
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       throw error;
+    } finally {
+      await queryRunner.release();
     }
   }
 
