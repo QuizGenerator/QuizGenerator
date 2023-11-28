@@ -8,7 +8,7 @@ import { ReturnDataDto } from './dto/return-data.dto';
 
 @Controller('data')
 export class DataController {
-  constructor(private readonly dataService: DataService) {}
+  constructor(private readonly dataService: DataService) { }
 
   @Post()
   @UseGuards(AuthGuard())
@@ -18,7 +18,7 @@ export class DataController {
 
   @Get()
   @UseGuards(AuthGuard())
-  getDataByUser(@getUserId() userid: number): Promise<ReturnDataDto> {
+  getDataByUser(@getUserId() userid: number): Promise<ReturnDataDto[]> {
     return this.dataService.getDataByUser(userid);
   }
 
