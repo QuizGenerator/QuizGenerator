@@ -14,7 +14,7 @@ export class DataService {
     @InjectRepository(Data) private readonly dataRepository: Repository<Data>,
     private userService: UserService,
     private quizService: QuizService,
-  ) { }
+  ) {}
 
   async createData(userId: number, createDatumDto: CreateDatumDto): Promise<Data> {
     try {
@@ -56,7 +56,7 @@ export class DataService {
 
       const result: ReturnDataDto[] = found.map((data) => {
         return data.createDto();
-      })
+      });
       return result;
     } catch (error) {
       throw error;
@@ -68,11 +68,11 @@ export class DataService {
       const user = await this.userService.getUserById(userid);
       const found = user
         ? await this.dataRepository.find({
-          where: {
-            user: { id: user.id },
-            category: { id: categoryid },
-          },
-        })
+            where: {
+              user: { id: user.id },
+              category: { id: categoryid },
+            },
+          })
         : null;
       return found || [];
     } catch (error) {

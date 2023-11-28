@@ -8,7 +8,7 @@ import { ReturnDataDto } from './dto/return-data.dto';
 
 @Controller('data')
 export class DataController {
-  constructor(private readonly dataService: DataService) { }
+  constructor(private readonly dataService: DataService) {}
 
   @Post()
   @UseGuards(AuthGuard())
