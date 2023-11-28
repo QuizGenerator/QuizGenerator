@@ -1,4 +1,4 @@
-import React, { useState,useContext } from 'react';
+import React, { useEffect,useState,useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
@@ -9,11 +9,23 @@ function QuizData() {
   const [questionType, setQuestionType] = useState('객관식');
   const [difficulty, setDifficulty] = useState(2);
   const [quizCount, setQuizCount] = useState(1);
-  const { authInfo } = useContext(AuthContext);
+  const { authInfo,updateAuthInfo } = useContext(AuthContext);
+  
+  const navigate = useNavigate();
+  useEffect(() => {
+    // authInfo.accessToken이 빈 문자열이면 로그인 페이지로 리디렉션
+    if (!authInfo.accessToken) {
+      alert("로그인이 필요합니다");
+      navigate('/login');
+    }
+  }, [authInfo.accessToken, navigate]); 
 
   // 최대 퀴즈 개수 계산
   const maxQuizCount = quizContent.length > 2000 ? 5 : quizContent.length > 1000 ? 4 : 3;
-
+  const navigateToLogin = () =>{
+    updateAuthInfo({ name: '', accessToken: '', categories: [] });
+    navigate('/login');
+  }
   const handleQuizContentChange = (event) => {
     setQuizContent(event.target.value);
     // 입력된 글자 수에 따라 quizCount 최대 값을 조정
@@ -21,9 +33,11 @@ function QuizData() {
       setQuizCount(maxQuizCount);
     }
   };
-  const navigate = useNavigate();
   const navigateToQG = () => {
     navigate('/QuizData');
+  };
+  const navigateToQS = () => {
+    navigate('/QuizSpace');
   };
 
   const handleTitleChange = (event) => {
@@ -43,7 +57,6 @@ function QuizData() {
   };
 
   const handleCreateQuiz = async () => {
-    // const prompt = `다음 내용을 바탕으로 ${quizCount}개의 난이도: ${difficultyLevels[difficulty - 1]}인 ${questionType === 'multiple-choice' ? '객관식' : '주관식'} 문제를 다음의 형식으로 Q#.""" (객관식일 경우는 보기)도 추가\\nA#.""" 생성 해주세요:\n${quizContent}`;
     let prompt;
   if (questionType === '주관식') {
     prompt = `Please create ${quizCount} subjective questions based on the following format: Q#(# is number).""" \\nA#(# is number).""" \\n Difficulty: ${difficultyLevels[difficulty-1]}\\n${quizContent}`;
@@ -52,12 +65,7 @@ function QuizData() {
     `;
       ;
   }
-  console.log("GPT - PROMPT:" , prompt);
-  console.log("questionType:", questionType);
-console.log("quizCount:", quizCount);
-console.log("difficultyLevels:", difficultyLevels);
-console.log("difficulty:", difficulty);
-console.log("quizContent:", quizContent);
+  
     try {
       const response = await axios.post("https://api.openai.com/v1/chat/completions",
         
@@ -77,8 +85,6 @@ console.log("quizContent:", quizContent);
         },
       });
       const data = response.data;
-      console.log("respone: ",response);
-      console.log("message: " ,response.data.choices[0].message);
       const text = data.choices[0].message.content.trim();
       const regex = /Q(\d+)\.(.*?)A\1\.(.*?)(?=(Q\d+\.|A\d+\.|$))/gs;
       const quizzes = [];
@@ -90,9 +96,33 @@ console.log("quizContent:", quizContent);
         answer: match[3].trim(),
       });
     }
-      console.log('GPT-3 응답 데이터:', data);
       
       alert('퀴즈가 생성되었습니다!');
+      try {
+        const quizData = {
+          inputText: quizContent,
+          difficulty: difficulty,
+          type: questionType,
+          dataTitle: title,
+          quizNum: quizCount,
+          quizzes: quizzes.map(quiz => ({ quizText: quiz.question, quizAnswer: quiz.answer }))
+        };
+    
+        const response = await axios.post('/data', quizData, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authInfo.accessToken}` // 토큰 추가
+          }
+        });
+    
+        // 서버 응답 처리
+        console.log('서버 응답:', response.data);
+        // 다음 단계 또는 성공 메시지 표시 등
+    
+      } catch (error) {
+        console.error('데이터 전송 중 오류 발생:', error);
+        // 에러 처리 (예: 에러 메시지 표시)
+      }
       // navigate('/QuizSet', { state: { generatedQuizzes: data.choices.map(choice => choice.text).join("\n\n") }});
       navigate('/QuizSet', { state: { generatedQuizzes: quizzes } });
     } catch (error) {
@@ -218,7 +248,14 @@ console.log("quizContent:", quizContent);
     borderRadius: '5px',
     cursor: 'pointer'
   };
-
+  const QSButtonStyle = {
+    background: 'white',
+    color: '#FF9800',
+    padding: '5px 15px',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer'
+  };
   return (
     <div style={mainContainerStyle}>
        <button onClick={navigateToQG} style={navigateToQGBtnStyle}>
@@ -227,7 +264,8 @@ console.log("quizContent:", quizContent);
       <div style={orangeShapeStyle}></div>
       <div style={topRightContainerStyle}>
         <div style={welcomeTextStyle}>{authInfo.name}님 환영합니다.</div>
-        <button style={logoutButtonStyle}>로그아웃</button>
+        <button onClick={navigateToLogin} style={logoutButtonStyle}>로그아웃</button>
+        <button onClick={navigateToQS} style={QSButtonStyle}>Quiz Space</button>
       </div>
       <h1 style={{
         position: 'absolute',

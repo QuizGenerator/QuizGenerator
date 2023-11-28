@@ -8,20 +8,14 @@ function LoginPage() {
   const [account, setAccount] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { updateAuthInfo ,authInfo} = useContext(AuthContext);
+  const { updateAuthInfo } = useContext(AuthContext);
   
-  useEffect(() => {
-    console.log('현재 authInfo:', authInfo); // authInfo 상태가 변경될 때마다 로그 출력
-  }, [authInfo]);
+
   const handleLogin = () => {
     console.log("login clicked");
     axios.post('/auth/signin', { account, password })
       .then(response => {
-        console.log("name: ", response.data.name);
-        
-        console.log("categori: ", response.data.returnCategories);
         console.log('로그인 성공:', typeof response.data);
-        console.log(response.headers);
         // 응답 헤더에서 JWT 토큰 추출
         const accessToken = response.headers['accesstoken'];
         const newAuthInfo = {

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './AuthContext';
 
 const QuizItem = ({ title, difficulty, questionCount, questionType, date, onChangeCategory, onDelete }) => {
   // 난이도 라벨 정의
@@ -15,6 +16,8 @@ const QuizItem = ({ title, difficulty, questionCount, questionType, date, onChan
     borderRadius: '5px',
     flexGrow: 1, // flex-grow 속성 추가
     whiteSpace: 'nowrap', // 줄바꿈 방지
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 그림자 효과 추가
+    minWidth: '550px'
   };
   const deleteBtnStyle = {
     border: 'none',
@@ -56,10 +59,16 @@ const QuizItem = ({ title, difficulty, questionCount, questionType, date, onChan
 
 const QuizSpace = () => {
   const navigate = useNavigate();
+  const { authInfo,updateAuthInfo } = useContext(AuthContext);
 
   const navigateToQG = () => {
     navigate('/QuizData');
   };
+
+  const navigateToLogin = () =>{
+    updateAuthInfo({ name: '', accessToken: '', categories: [] });
+    navigate('/login');
+  }
 
   const [activeTab, setActiveTab] = useState('미분류');
   const [quizzes, setQuizzes] = useState([
@@ -98,18 +107,27 @@ const QuizSpace = () => {
       questionType: 'multiple-choice',
       date: '2023 10 23 18:07'
     },
-    {
-      title: 'Data Title5',
-      difficulty: 'Hard',
-      questionCount: 5,
-      questionType: 'multiple-choice',
-      date: '2023 10 23 18:07'
-    },
-    // ... 다른 퀴즈들
   ]);
   // 카테고리 관련 상태
   const [categories, setCategories] = useState(['미분류', '카테고리1', '카테고리2']);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  // 카테고리 변경 모달 상태
+  const [showChangeCategoryModal, setShowChangeCategoryModal] = useState(false);
+  const [selectedQuizTitle, setSelectedQuizTitle] = useState(null);
+
+  // 카테고리 변경 모달을 여는 함수
+  const openChangeCategoryModal = (quizTitle) => {
+    setShowChangeCategoryModal(true);
+    setSelectedQuizTitle(quizTitle);
+  };
+
+  // 카테고리 변경 모달을 닫는 함수
+  const closeChangeCategoryModal = () => {
+    setShowChangeCategoryModal(false);
+    setSelectedQuizTitle(null);
+  };
+
 
   // 카테고리 관리 모달을 여는 함수
   const openCategoryModal = () => {
@@ -193,38 +211,50 @@ const QuizSpace = () => {
   };
 
   const tabAndButtonContainerStyle = {
-    alignItems: 'center', // 세로 중앙 정렬
-    maxWidth: '96%', // 컨테이너 최대 너비
+    position: 'absolute',
+    top: '19%',
+    // zIndex: 1,
+    display: 'flex',
+    whiteSpace: 'nowrap', // 줄바꿈 X
+    justifyContent: 'center', // 요소들 사이에 공간 추가
+    width: '65%', // 너비 65%
+    maxWidth: '65%', // 컨테이너 최대 너비
     margin: '20px auto',
-    marginBottom: '20px' // 하단 여백
+    // alignItems: 'center', // 컨테이너 세로축의 중앙으로 정렬
   };
 
 
   const tabContainerStyle = {
-    position: 'absolute', // 절대 위치
     display: 'flex',
     overflowX: 'auto', // 가로 스크롤 가능하게 설정
     maxWidth: '80%', // 너비 65%
-    // margin: 'auto', // 가운데 정렬
+    width: '80%', // 너비 65%
     whiteSpace: 'nowrap', // 줄바꿈 X
+    // margin: 'auto', // 가운데 정렬
+    // position: 'absolute', // 절대 위치
   };
 
   const editCategoryButtonStyle = {
     whiteSpace: 'nowrap', // 줄바꿈 방지
     background: '#FF9800',
     color: 'white',
-    padding: '5px 15px',
+    padding: '6px 15px',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    marginLeft: '490px',
-    marginTop: '-100px' // 위쪽으로 10픽셀 이동
+    // margin: 'auto', // 가운데 정렬
+    // marginLeft: '450px',
+    // transform: 'translateY(-8px)',
   };
 
   const quizContainerStyle = {
-    maxHeight: '410px', // 컨테이너의 최대 높이 설정
+    position: 'absolute', // 상대 위치
+    top: '30%',
+    maxHeight: '460px', // 컨테이너의 최대 높이 설정
     overflowY: 'auto', // 세로 스크롤 적용
-    width: '100%', // 컨테이너의 너비 설정
+    width: '60%', // 컨테이너의 너비 설정
+    maxHeight: '50%', // 너비 65%
+    height: '50%', // 너비 65%
     padding: '10px',
     background: '#FFC107',
     borderRadius: '5px',
@@ -258,8 +288,8 @@ const QuizSpace = () => {
       </button>
       <div style={orangeShapeStyle}></div>
       <div style={topRightContainerStyle}>
-        <div style={welcomeTextStyle}>UserName님 환영합니다.</div>
-        <button style={logoutButtonStyle}>로그아웃</button>
+        <div style={welcomeTextStyle}>{authInfo.name}님 환영합니다.</div>
+        <button onClick={navigateToLogin} style={logoutButtonStyle}>로그아웃</button>
       </div>
       <h1 style={{ // 페이지표시(h1): "QuizSpace"
         position: 'absolute',
@@ -268,48 +298,63 @@ const QuizSpace = () => {
         transform: 'translateX(-50%)',
         zIndex: 10
       }}>QuizSpace
-        <div style={tabAndButtonContainerStyle}>
-          <div style={tabContainerStyle}>
-            <TabButton name='미분류' activeTab={activeTab} setActiveTab={setActiveTab} />
-            <TabButton name='카테고리1' activeTab={activeTab} setActiveTab={setActiveTab} />
-            <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
-            {/* More tabs... */}
-          </div>
-          <button onClick={openCategoryModal} style={editCategoryButtonStyle}>
-            카테고리 관리
-          </button>
-        </div>
-        {/* 카테고리 관리 모달 */}
-        {showCategoryModal && (
-          <div>
-            {/* 모달 내용: 카테고리 추가, 삭제, 이름 변경 UI 및 로직 */}
-          </div>
-        )}
-
       </h1>
+      <div style={tabAndButtonContainerStyle}>
+        <div style={tabContainerStyle}>
+          <TabButton name='미분류' activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton name='카테고리1' activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
+          {/* More tabs... */}
+        </div>
+        <button onClick={openCategoryModal} style={editCategoryButtonStyle}>
+          카테고리 관리
+        </button>
+      </div>
+      {/* 카테고리 관리 모달 */}
+      {showCategoryModal && (
+        <div>
+          {/* 모달 내용: 카테고리 추가, 삭제, 이름 변경 UI 및 로직 */}
+        </div>
+      )}
 
-      <div style={{
+      {/* 카테고리 변경 모달 */}
+      {showChangeCategoryModal && (
+        <div className="modal">
+          {/* 모달 오버레이 및 내용 */}
+          <button onClick={closeChangeCategoryModal}>닫기</button>
+          {/* 카테고리 변경 로직 */}
+        </div>
+      )}
+
+
+      <div style={quizContainerStyle}>
+        {quizzes.map((quiz, index) => (
+          <QuizItem
+            key={index}
+            title={quiz.title}
+            difficulty={quiz.difficulty}
+            questionCount={quiz.questionCount}
+            questionType={quiz.questionType}
+            date={quiz.date}
+            onChangeCategory={() => openChangeCategoryModal(quiz.title)}
+            onDelete={() => handleDelete(quiz.title)}
+          />
+        ))}
+      </div>
+      {/* <div style={{
+        background: '#FFC107',
         background: '#FFC107',
         borderRadius: '5px',
         padding: '10px',
         maxWidth: '600px',
         margin: 'auto'
       }}>
-        <div style={quizContainerStyle}>
-          {quizzes.map((quiz, index) => (
-            <QuizItem
-              key={index}
-              title={quiz.title}
-              difficulty={quiz.difficulty}
-              questionCount={quiz.questionCount}
-              questionType={quiz.questionType}
-              date={quiz.date}
-              onChangeCategory={() => handleChangeCategory(quiz.title)}
-              onDelete={() => handleDelete(quiz.title)}
-            />
-          ))}
-        </div>
-      </div>
+      </div> */}
     </div>
   );
 };
