@@ -1,8 +1,18 @@
 import { Data } from 'src/data/entities/data.entity';
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { ReturnQuizDto } from '../dto/return-quiz.dto';
 
 @Entity('Quiz')
 export class Quiz {
+
+  createDto() : ReturnQuizDto {
+    const returnQuizDto = new ReturnQuizDto();
+    returnQuizDto.quizID = this.id;
+    returnQuizDto.quizAnswer = this.quizAnswer;
+    returnQuizDto.quizText = this.quizText;
+    return returnQuizDto;
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 
