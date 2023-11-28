@@ -12,11 +12,11 @@ function SignUpPage() {
 
   const handleSignUp = () => {
     if (password !== confirmPassword) {
-      console.log('비밀번호가 일치하지 않습니다.');
+      alert('비밀번호가 일치하지 않습니다.');
       return;
     }
     if (!isIdChecked) {
-      console.log('ID 중복 확인이 필요합니다.');
+      alert('ID 중복 확인이 필요합니다.');
       return;
     }
   

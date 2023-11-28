@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from './AuthContext';
 
 function QuizData() {
   const [quizContent, setQuizContent] = useState('');
@@ -8,6 +9,8 @@ function QuizData() {
   const [questionType, setQuestionType] = useState('객관식');
   const [difficulty, setDifficulty] = useState(2);
   const [quizCount, setQuizCount] = useState(1);
+  const { authInfo } = useContext(AuthContext);
+
   // 최대 퀴즈 개수 계산
   const maxQuizCount = quizContent.length > 2000 ? 5 : quizContent.length > 1000 ? 4 : 3;
 
@@ -223,7 +226,7 @@ console.log("quizContent:", quizContent);
       </button>
       <div style={orangeShapeStyle}></div>
       <div style={topRightContainerStyle}>
-        <div style={welcomeTextStyle}>UserName님 환영합니다.</div>
+        <div style={welcomeTextStyle}>{authInfo.name}님 환영합니다.</div>
         <button style={logoutButtonStyle}>로그아웃</button>
       </div>
       <h1 style={{
