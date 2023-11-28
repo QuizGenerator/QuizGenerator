@@ -10,9 +10,18 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ReturnDataDto } from '../dto/return-data.dto';
 
 @Entity('Data')
 export class Data {
+  createDto() {
+    const returnDataDto = new ReturnDataDto();
+    returnDataDto.dataId = this.id;
+    returnDataDto.DataTitle = this.dataTitle;
+    returnDataDto.Difficulty = this.difficulty;
+    returnDataDto.QuizNum = this.quizNum;
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -26,7 +35,7 @@ export class Data {
   inputText: string;
 
   @Column()
-  difficulty: number;
+  difficulty: string;
 
   @Column({ type: 'varchar' })
   type: string;

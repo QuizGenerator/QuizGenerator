@@ -52,6 +52,9 @@ export class DataService {
     try {
       const user = await this.userService.getUserById(userid);
       const found = user ? await this.dataRepository.find({ where: { user: { id: user.id } } }) : null;
+
+      const data: Data = found[0];
+
       return found || [];
     } catch (error) {
       throw error;

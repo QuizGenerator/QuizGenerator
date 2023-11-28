@@ -13,7 +13,7 @@ export class CreateDatumDto {
   inputText: string;
 
   @IsNumber()
-  difficulty: number;
+  difficulty: string;
 
   @IsString()
   type: string;

@@ -16,7 +16,7 @@ export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       entities: [Category, User, Data, Quiz],
-      synchronize: false,
+      synchronize: true,
       logging: false,
     };
     return option;
