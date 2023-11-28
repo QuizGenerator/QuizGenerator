@@ -60,7 +60,6 @@ export class AuthService {
     try {
       const returnSignInDto = new ReturnSignInDto();
       returnSignInDto.account = user.account;
-      returnSignInDto.userID = user.id;
       returnSignInDto.name = user.name;
       const categories: ReturnCategoryDto[] = await this.categoryService.getCategories(user.id);
       returnSignInDto.returnCategories = categories;
