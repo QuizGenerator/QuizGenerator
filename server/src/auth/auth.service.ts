@@ -42,7 +42,6 @@ export class AuthService {
     const result: LoginResultType = {
       user: user,
       accessToken: accessToken,
-      cookieOption: this.getCookieOption(),
     };
     return result;
   }
