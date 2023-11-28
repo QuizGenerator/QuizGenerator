@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
-import { Quiz } from './entities/quiz.entity';
+import { ReturnQuizDto } from './dto/return-quiz.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('quiz')
 export class QuizController {
@@ -12,29 +12,10 @@ export class QuizController {
   createQuiz(@Body() createQuizDto: CreateQuizDto): Promise<boolean> {
     return this.quizService.createQuiz(createQuizDto);
   }
-
-  // @Post()
-  // create(@Body() createQuizDto: CreateQuizDto) {
-  //   return this.quizService.create(createQuizDto);
-  // }
-
-  // @Get()
-  // findAll() {
-  //   return this.quizService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.quizService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateQuizDto: UpdateQuizDto) {
-  //   return this.quizService.update(+id, updateQuizDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.quizService.remove(+id);
-  // }
+  
+  @Get(':DataID')
+  // @UseGuards(AuthGuard())
+  getQuizById(@Param('DataID') dataId:number):Promise<ReturnQuizDto[]>{
+    return this.quizService.getQuizById(dataId);
+  }
 }
