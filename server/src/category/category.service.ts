@@ -79,7 +79,6 @@ export class CategoryService {
       return category.createDto();
     });
 
-    console.log(returnCategoryDto);
     return returnCategoryDto;
   }
 }

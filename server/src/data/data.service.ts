@@ -61,8 +61,22 @@ export class DataService {
   async getDataByUser(userid: number): Promise<ReturnDataDto[]> {
     try {
       const user = await this.userService.getUserById(userid);
-      const found = user ? await this.dataRepository.find({ where: { user: { id: user.id } } }) : null;
-
+      const found = user
+        ? await this.dataRepository.find({
+            select: {
+              id: true,
+              dataTitle: true,
+              quizNum: true,
+              inputText: true,
+              difficulty: true,
+              type: true,
+              createdAt: true,
+              category: { id: true },
+            },
+            relations: { category: true },
+            where: { user: { id: user.id } },
+          })
+        : null;
       const result: ReturnDataDto[] = found.map((data) => {
         return data.createDto();
       });

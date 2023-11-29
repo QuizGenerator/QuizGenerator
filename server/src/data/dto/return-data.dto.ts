@@ -6,4 +6,5 @@ export class ReturnDataDto {
   Type: string;
   DataTitle: string;
   created_at: Date;
+  CategoryId: number;
 }

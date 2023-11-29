@@ -23,6 +23,7 @@ export class Data {
     returnDataDto.Type = this.type;
     returnDataDto.created_at = this.createdAt;
     returnDataDto.inputText = this.inputText;
+    returnDataDto.CategoryId = this.category.id;
     return returnDataDto;
   }
 
