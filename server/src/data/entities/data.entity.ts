@@ -21,7 +21,10 @@ export class Data {
     returnDataDto.Difficulty = this.difficulty;
     returnDataDto.QuizNum = this.quizNum;
     returnDataDto.Type = this.type;
-    returnDataDto.created_at = this.createdAt;
+
+    const koreaTime = new Date(this.createdAt.getTime() + 9 * 60 * 60 * 1000);
+    returnDataDto.created_at = koreaTime;
+
     returnDataDto.inputText = this.inputText;
     returnDataDto.CategoryId = this.category.id;
     return returnDataDto;
