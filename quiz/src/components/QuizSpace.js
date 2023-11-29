@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 
-const QuizItem = ({ title, difficulty, questionCount, questionType, date, dataId, onChangeCategory, onDelete, onItemClick }) => {
+const QuizItem = ({ title, difficulty, questionCount, questionType, date, dataId,CategoryId,onChangeCategory, onDelete, onItemClick,categoryName }) => {
   // 난이도 라벨 정의
   const difficultyLabels = { 'Hard': '상', 'Medium': '중', 'Easy': '하' };
   const handleButtonClick = (event, action) => {
@@ -104,6 +104,61 @@ const QuizSpace = () => {
       console.error('퀴즈 삭제 중 오류 발생:', error);
     }
   };
+  const handleAddCategory = async (newCategoryName) => {
+    if (!newCategoryName.trim()) return;
+    setIsAddingCategory(false);
+    try {
+      const response = await axios.post('/category', { Department: newCategoryName }, {
+        headers: {
+          "Authorization": `Bearer ${authInfo.accessToken}`
+        }
+      });
+      console.log(response.data);
+      
+      // 카테고리 추가 후 authInfo.categories 업데이트
+      alert("카테고리 추가 완료")
+      updateAuthInfo({ ...authInfo, categories: response.data });
+    } catch (error) {
+      console.error('카테고리 생성 중 오류 발생:', error);
+    }
+    
+    
+  };
+  const handleDeleteCategory = async (categoryId) => {
+    if (window.confirm('이 카테고리를 삭제하시겠습니까?')) {
+      try {
+        const response = await axios.delete(`/category/${categoryId}`, {
+          headers: {
+            "Authorization": `Bearer ${authInfo.accessToken}`
+          }
+        });
+        console.log("response:",response.data)
+        const updatedCategories = Array.isArray(response.data) ? response.data : [response.data];
+
+            // authInfo.categories 업데이트
+            updateAuthInfo({ ...authInfo, categories: updatedCategories });
+      } catch (error) {
+        console.error('카테고리 삭제 중 오류 발생:', error);
+      }
+    }
+  };
+  const handleEditCategory = async (categoryId, newDepartmentName) => {
+    try {
+      const response = await axios.patch(`/category/${categoryId}`, { Department: newDepartmentName }, {
+        headers: {
+          "Authorization": `Bearer ${authInfo.accessToken}`
+        }
+      });
+      // 카테고리 편집 후 authInfo.categories 업데이트
+      updateAuthInfo({ ...authInfo, categories: response.data });
+    } catch (error) {
+      console.error('카테고리 편집 중 오류 발생:', error);
+    }
+  };
+  const getCategoryNameById = (categoryId) => {
+    const category = authInfo.categories.find(c => c.CategoryId === categoryId);
+    return category ? category.Department : '미분류';
+  };
   
   useEffect(() => {
     const fetchData = async () => {
@@ -113,23 +168,23 @@ const QuizSpace = () => {
             "Authorization": `Bearer ${authInfo.accessToken}`
           }
         });
-        // API 응답을 기반으로 quizzes 상태를 설정
+        // 서버 응답을 사용하여 퀴즈 데이터 설정
         const fetchedQuizzes = response.data.map(quiz => ({
           title: quiz.DataTitle,
-          difficulty: quiz.Difficulty, // API에서 제공하는 난이도 값 사용
+          difficulty: quiz.Difficulty,
           questionCount: quiz.QuizNum,
           questionType: quiz.Type,
           date: new Date(quiz.created_at).toLocaleDateString() + ' ' + new Date(quiz.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-
-          dataId : quiz.dataId
+          dataId: quiz.dataId,
+          CategoryId: quiz.CategoryId, // 카테고리 ID 추가
+          categoryName: getCategoryNameById(quiz.CategoryId) // 여기에 카테고리 이름을 추가
         }));
-        console.log(response.data);
         setQuizzes(fetchedQuizzes);
       } catch (error) {
         console.error('데이터 가져오기 실패:', error);
       }
     };
-
+  
     fetchData();
   }, [authInfo.accessToken, navigate]);
   const handleQuizItemClick = (dataId) => {
@@ -138,22 +193,53 @@ const QuizSpace = () => {
     navigate(`/destination/${dataId}`);
   };
 
+  useEffect(() => {
+    console.log("업데이트때",authInfo)
+    // authInfo의 categories가 변경될 때 마다 퀴즈 목록을 다시 가져옵니다.
+    const fetchQuizzes = async () => {
+      try {
+        const response = await axios.get('/data', {
+          headers: {
+            "Authorization": `Bearer ${authInfo.accessToken}`
+          }
+        });
+        // 서버 응답을 사용하여 퀴즈 데이터 설정
+        const fetchedQuizzes = response.data.map(quiz => ({
+          title: quiz.DataTitle,
+          difficulty: quiz.Difficulty,
+          questionCount: quiz.QuizNum,
+          questionType: quiz.Type,
+          date: new Date(quiz.created_at).toLocaleDateString() + ' ' + new Date(quiz.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+          dataId: quiz.dataId,
+          CategoryId: quiz.CategoryId,
+          categoryName: getCategoryNameById(quiz.CategoryId)
+        }));
+        setQuizzes(fetchedQuizzes);
+      } catch (error) {
+        console.error('데이터 가져오기 실패:', error);
+      }
+    };
+  
+    fetchQuizzes();
+  }, [authInfo, navigate]); 
+
   
 
   const [activeTab, setActiveTab] = useState('미분류');
+  const [modifyCategory, setModifyCategory] = useState({ dataId: null, categoryId: null });
   const [quizzes, setQuizzes] = useState([]);
   // 카테고리 관련 상태
-  const [categories, setCategories] = useState(['미분류', '카테고리1', '카테고리2']);
+  const [categories, setCategories] = useState(authInfo.categories);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const filteredQuizzes = quizzes.filter(quiz => quiz.categoryName === activeTab);
 
   // 카테고리 변경 모달 상태
   const [showChangeCategoryModal, setShowChangeCategoryModal] = useState(false);
   const [selectedQuizTitle, setSelectedQuizTitle] = useState(null);
 
   // 카테고리 변경 모달을 여는 함수
-  const openChangeCategoryModal = (quizTitle) => {
-    setShowChangeCategoryModal(true);
-    setSelectedQuizTitle(quizTitle);
+  const openChangeCategoryModal = (index) => {
+    setModifyCategory(index);
   };
 
   // 카테고리 변경 모달을 닫는 함수
@@ -175,7 +261,41 @@ const QuizSpace = () => {
   const handleChangeCategory = (quizTitle) => {
     // 카테고리 변경 로직
   };
-
+  // 카테고리 추가 버튼 및 입력 필드 컴포넌트
+  const CategoryAddInput = ({ newCategoryName, handleNewCategoryNameChange, handleAddCategory, setIsAddingCategory }) => {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <input
+          type="text"
+          value={newCategoryName}
+          onChange={handleNewCategoryNameChange}
+          style={{
+            fontSize: '1em',
+            padding: '5px',
+            margin: '0 5px',
+            borderRadius: '5px',
+            border: '1px solid #ccc'
+          }}
+        />
+        <button
+          onClick={() => {
+            handleAddCategory(newCategoryName);
+            setIsAddingCategory(false);
+          }}
+          style={{
+            background: '#FF9800',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            padding: '5px 10px'
+          }}
+        >
+          확인
+        </button>
+      </div>
+    );
+  };
   const navigateToQGBtnStyle = {
     // 배치
     position: 'absolute',
@@ -255,7 +375,7 @@ const QuizSpace = () => {
 
   const categoryNameDisplayPosition = {
     // alignSelf: 'flex-start', // 부모 컨테이너의 시작점에 정렬
-    padding: '10px 0',
+   marginTop: '40px',
     zIndex: 10,
     width: '100%', // 전체 폭 사용
   };
@@ -298,7 +418,7 @@ const QuizSpace = () => {
           cursor: 'pointer',
           margin: '0 2px', // 버튼 간의 좌우 간격 추가
           whiteSpace: 'nowrap', // 줄바꿈 방지
-          width: '90px'
+          width: 'auto',
         }}
         onClick={() => setActiveTab(name)}
       >
@@ -320,23 +440,36 @@ const QuizSpace = () => {
     setCategoryName(event.target.value);
   };
 
-  // 카테고리 이름 수정 모드 활성화
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
 
-  // 카테고리 이름 수정 적용
-  const handleApplyEdit = () => {
-    setIsEditing(false);
-    // 여기서 변경된 카테고리 이름을 서버에 저장하는 로직을 추가할 수 있습니다
-  };
+// "수정" 버튼 클릭 핸들러
+const handleEditClick = () => {
+  setIsEditing(true);
+  const categoryId = findCategoryIdByName(activeTab);
+  setEditingCategoryId(categoryId);
+};
 
-  // 카테고리 삭제 처리
-  const handleDeleteCategory = () => {
-    // 카테고리 삭제 처리 로직
-    alert("카테고리가 삭제되었습니다");
-    // 카테고리 삭제 후 필요한 동작 수행
-  };
+
+// "적용" 버튼 클릭 핸들러
+const handleApplyEdit = () => {
+  setIsEditing(false);
+  if (editingCategoryId && categoryName) {
+    console.log(categoryName);
+    handleEditCategory(editingCategoryId, categoryName);
+    setEditingCategoryId(null); // 편집 중인 카테고리 ID 초기화
+  }
+};
+  
+
+// 현재 활성화된 카테고리의 ID를 찾는 함수
+const findCategoryIdByName = (categoryName) => {
+  const category = categories.find(c => c.Department === categoryName);
+  return category ? category.CategoryId : null;
+};
+const onDeleteCategoryClick = () => {
+  const categoryId = findCategoryIdByName(activeTab);
+  handleDeleteCategory(categoryId);
+};
+ 
 
   // 카테고리 이름 표시 및 편집 UI
   const categoryNameDisplayStyle = {
@@ -348,6 +481,16 @@ const QuizSpace = () => {
     fontSize: '2em', // 글씨 크기 증가
     fontWeight: 'bold',
     zIndex: 10
+  };
+
+  const addCategoryButtonStyle = {
+    background: '#FFFFFF',
+    border: '1px solid black',
+    padding: '5px 15px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    margin: '0 2px',
+    whiteSpace: 'nowrap'
   };
 
   const categoryNameDisplay = (
@@ -366,10 +509,10 @@ const QuizSpace = () => {
       ) : (
         <span>{categoryName}</span>
       )}
-      <button onClick={isEditing ? handleApplyEdit : handleEditClick}>
-        {isEditing ? "적용" : "수정"}
-      </button>
-      <button onClick={handleDeleteCategory}>삭제</button>
+<button onClick={isEditing ? handleApplyEdit : handleEditClick}>
+  {isEditing ? "적용" : "수정"}
+</button>
+      <button onClick={onDeleteCategoryClick}>삭제</button>
     </div>
   );
 
@@ -377,39 +520,112 @@ const QuizSpace = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
-  const handleNewCategoryNameChange = (event) => {
-    setNewCategoryName(event.target.value);
-  };
+  // 현재 편집 중인 카테고리의 ID를 추적하는 상태 변수
+const [editingCategoryId, setEditingCategoryId] = useState(null);
 
-  const addCategory = () => {
-    if (newCategoryName.trim() !== '') {
-      setCategories([...categories, newCategoryName]);
-      setNewCategoryName('');
-    }
-    setIsAddingCategory(false);
-  };
+const handleNewCategoryNameChange = (event) => {
+  setNewCategoryName(event.target.value);
+};
 
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      addCategory();
-    }
-  };
+const addCategory = () => {
+  if (newCategoryName.trim() !== '') {
+    setCategories([...categories, newCategoryName]);
+    setNewCategoryName('');
+  }
+  setIsAddingCategory(false);
+};
 
+const handleKeyDown = (event) => {
+  if (event.key === 'Enter') {
+    addCategory();
+  }
+};
+
+  // 카테고리 추가 버튼 또는 입력 필드 렌더링
   const categoryNameInput = isAddingCategory ? (
-    <input
-      type="text"
-      value={newCategoryName}
-      onChange={handleNewCategoryNameChange}
-      onKeyDown={handleKeyDown}
-      onBlur={addCategory} // 다른 곳 클릭 시 적용
-      autoFocus
-    />
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <input
+        type="text"
+        value={newCategoryName}
+        onChange={handleNewCategoryNameChange}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            handleAddCategory(newCategoryName);
+          }
+        }}
+        style={{
+          fontSize: '1em',
+          padding: '5px',
+          margin: '0 5px',
+          borderRadius: '5px',
+          border: '1px solid #ccc'
+        }}
+      />
+      <button
+        onClick={() => handleAddCategory(newCategoryName)}
+        style={{
+          background: '#FF9800',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          padding: '5px 10px'
+        }}
+      >
+        확인
+      </button>
+    </div>
   ) : (
-    <button onClick={() => setIsAddingCategory(true)}>카테고리 추가</button>
+    <button onClick={() => setIsAddingCategory(true)} style={addCategoryButtonStyle}>
+      카테고리 추가
+    </button>
   );
 
 
+  const ModBtn = ({ name, setActiveTab, categoryID, dataId }) => {
+    return (
+      <button
+        style={{
+          background: '#FFFFFF',
+          border: '1px solid black', // 검은색 테두리 추가
+          padding: '5px 15px',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          margin: '0 2px', // 버튼 간의 좌우 간격 추가
+          whiteSpace: 'nowrap', // 줄바꿈 방지
+          width: 'auto',
+        }}
+        onClick={() => {
+          const userResponse = window.confirm(`${name} 카테고리로 퀴즈를 이동시키시겠습니까?`)
+          if (userResponse) {
+            const fetchData = async () => {
+              console.log(categoryID, dataId)
+              try {
 
+                const response = await axios.patch('/category', { DataID: dataId, nextCID: categoryID }, {
+                  headers: {
+                    "Authorization": `Bearer ${authInfo.accessToken}`
+                  }
+                });
+                // API 응답을 기반으로 quizzes 상태를 설정
+                console.log(response);
+
+              } catch (error) {
+                console.error('데이터 가져오기 실패:', error);
+              }
+            };
+
+            fetchData();
+          }
+          else {
+            console.log("취소")
+          }
+        }}
+      >
+        {name}
+      </button>
+    );
+  };
   return (
     <div style={mainContainerStyle}>
       <button onClick={navigateToQG} style={navigateToQGBtnStyle}>
@@ -430,24 +646,20 @@ const QuizSpace = () => {
       </h1>
       <div style={tabContainerStyle}>
         <TabButton name='미분류' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리1' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리2' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리3' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리4' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리5' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리6' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리7' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리8' activeTab={activeTab} setActiveTab={setActiveTab} />
-        <TabButton name='카테고리9' activeTab={activeTab} setActiveTab={setActiveTab} />
+        {categories.map((category, index) => {
+          return (<TabButton name={category.Department} activeTab={activeTab} setActiveTab={setActiveTab} key={index} />)
+        })}
         {categoryNameInput}
       </div>
+      
       <div style={NameAndQuizContainerStyle}>
         <div style={categoryNameDisplayPosition}>
           {categoryNameDisplay}
         </div>
         <div style={quizContainerStyle}>
 
-          {quizzes.map((quiz, index) => (
+          {filteredQuizzes.map((quiz, index) => (
+            <div key = {index}>
             <QuizItem
               key={index}
               title={quiz.title}
@@ -455,10 +667,19 @@ const QuizSpace = () => {
               questionCount={quiz.questionCount}
               questionType={quiz.questionType}
               date={quiz.date}
-              onChangeCategory={() => openChangeCategoryModal(quiz.title)}
+              CategoryId={quiz.CategoryId}
+              onChangeCategory={() => openChangeCategoryModal(index)}
               onDelete={()=> handleDelete(quiz.dataId)}
               onItemClick={() => handleQuizItemClick(quiz.dataId)}
             />
+            <div style={{ width: "100%", overflowX: "auto", display: `${modifyCategory === index ? "flex" : "none"}` }}>
+            <ModBtn name='미분류' activeTab={modifyCategory.name} setActiveTab={setModifyCategory} />
+            {categories.map((category, index) => {
+
+              return (<ModBtn name={category.Department} activeTab={modifyCategory.name} setActiveTab={setModifyCategory} key={index} categoryID={category.CategoryId} dataId={quiz.dataId} />)
+            })}
+          </div>
+          </div>
           ))}
         </div>
       </div>
