@@ -57,17 +57,23 @@ export class CategoryService {
     }
   }
 
-  async createCategory(userID: number, department: string) {
+  async createCategory(userID: number, department: string): Promise<ReturnCategoryDto[]> {
     try {
       const rows: User[] = await this.userRepository.find({ where: { id: userID } });
       const user = rows[0];
 
-      await this.categoryRepository
+      const rows1 = await this.categoryRepository
         .createQueryBuilder()
         .insert()
         .into(Category)
         .values([{ department: department, user: user, dataNum: 0 }])
         .execute();
+      const rows2 = await this.categoryRepository.find({});
+      const result: ReturnCategoryDto[] = rows2.map((category) => {
+        return category.createDto();
+      });
+
+      return result;
     } catch (error) {
       throw error;
     }

@@ -5,6 +5,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ChangeCategoryDto } from './dto/change-category.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { getUserId } from 'src/decorator/get-user.decorator';
+import { ReturnCategoryDto } from './dto/return-category.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -30,7 +31,10 @@ export class CategoryController {
 
   @Post()
   @UseGuards(AuthGuard())
-  createCategory(@getUserId() userID: number, @Body() createCategoryDto: CreateCategoryDto) {
+  createCategory(
+    @getUserId() userID: number,
+    @Body() createCategoryDto: CreateCategoryDto,
+  ): Promise<ReturnCategoryDto[]> {
     return this.categoryService.createCategory(userID, createCategoryDto.Department);
   }
 }
