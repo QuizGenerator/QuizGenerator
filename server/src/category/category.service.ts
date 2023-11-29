@@ -68,11 +68,10 @@ export class CategoryService {
         .into(Category)
         .values([{ department: department, user: user, dataNum: 0 }])
         .execute();
-      const rows2 = await this.categoryRepository.find({});
+      const rows2 = await this.categoryRepository.find({ where: { user: { id: userID } } });
       const result: ReturnCategoryDto[] = rows2.map((category) => {
         return category.createDto();
       });
-
       return result;
     } catch (error) {
       throw error;
