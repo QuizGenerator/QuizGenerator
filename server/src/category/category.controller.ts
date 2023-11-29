@@ -13,20 +13,24 @@ export class CategoryController {
 
   @Delete(':categoryID')
   @UseGuards(AuthGuard())
-  remove(@Param('categoryID') categoryId: number) {
-    return this.categoryService.deleteCategoryById(categoryId);
+  remove(@getUserId() userID: number, @Param('categoryID') categoryId: number) {
+    return this.categoryService.deleteCategoryById(userID, categoryId);
   }
 
   @Patch(':categoryID')
   @UseGuards(AuthGuard())
-  update(@Param('categoryID') categoryId: number, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryService.updateCategory(categoryId, updateCategoryDto);
+  update(
+    @getUserId() userID: number,
+    @Param('categoryID') categoryId: number,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    return this.categoryService.updateCategory(userID, categoryId, updateCategoryDto);
   }
 
   @Patch()
   @UseGuards(AuthGuard())
-  changeCategory(@Body() changeCategoryDto: ChangeCategoryDto) {
-    return this.categoryService.changeCategory(changeCategoryDto.DataID, changeCategoryDto.nextCID);
+  changeCategory(@getUserId() userID: number, @Body() changeCategoryDto: ChangeCategoryDto) {
+    return this.categoryService.changeCategory(userID, changeCategoryDto.DataID, changeCategoryDto.nextCID);
   }
 
   @Post()

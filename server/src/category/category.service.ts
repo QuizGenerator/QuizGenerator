@@ -14,17 +14,21 @@ export class CategoryService {
     @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Data) private readonly dataRepository: Repository<Data>,
   ) {}
-  async deleteCategoryById(id: number): Promise<ReturnCategoryDto> {
+  async deleteCategoryById(userID: number, id: number): Promise<ReturnCategoryDto[]> {
     try {
       const data = await this.categoryRepository.find({ where: { id: id }, relations: { datas: { quizzes: true } } });
-      const result = await this.categoryRepository.softRemove(data);
-      return { CategoryId: result[0].id, Department: result[0].department, DataNum: result[0].dataNum };
+      const delResult = await this.categoryRepository.softRemove(data);
+      const rows2 = await this.categoryRepository.find({ where: { user: { id: userID } } });
+      const result: ReturnCategoryDto[] = rows2.map((category) => {
+        return category.createDto();
+      });
+      return result;
     } catch (error) {
       throw error;
     }
   }
 
-  async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<ReturnCategoryDto> {
+  async updateCategory(userID: number, id: number, updateCategoryDto: UpdateCategoryDto): Promise<ReturnCategoryDto[]> {
     try {
       const { department } = updateCategoryDto;
       await this.categoryRepository
@@ -33,14 +37,17 @@ export class CategoryService {
         .set({ department: department })
         .where({ id: id })
         .execute();
-      const category = await this.categoryRepository.find({ where: { id: id } });
-      return { CategoryId: category[0].id, Department: category[0].department, DataNum: category[0].dataNum };
+      const rows2 = await this.categoryRepository.find({ where: { user: { id: userID } } });
+      const result: ReturnCategoryDto[] = rows2.map((category) => {
+        return category.createDto();
+      });
+      return result;
     } catch (error) {
       throw error;
     }
   }
 
-  async changeCategory(dataID: number, nextCID: number) {
+  async changeCategory(userID: number, dataID: number, nextCID: number) {
     try {
       const rows: Category[] = await this.categoryRepository.find({ where: { id: nextCID } });
       if (rows.length !== 1) throw new NotFoundException(`cannot find category with id : ${nextCID}`);
@@ -52,6 +59,11 @@ export class CategoryService {
         .set({ category: nextCategory })
         .where('id = :id', { id: dataID })
         .execute();
+      const rows2 = await this.categoryRepository.find({ where: { user: { id: userID } } });
+      const result: ReturnCategoryDto[] = rows2.map((category) => {
+        return category.createDto();
+      });
+      return result;
     } catch (error) {
       throw error;
     }
