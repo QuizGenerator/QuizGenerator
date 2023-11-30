@@ -26,7 +26,8 @@ export class Data {
     returnDataDto.created_at = koreaTime;
 
     returnDataDto.inputText = this.inputText;
-    returnDataDto.CategoryId = this.category.id;
+    returnDataDto.CategoryId = this.category ? this.category.id : null;
+
     return returnDataDto;
   }
 
@@ -61,5 +62,5 @@ export class Data {
   user: User;
 
   @ManyToOne(() => Category, (category) => category.datas, { nullable: true })
-  category: Category;
+  category?: Category;
 }
