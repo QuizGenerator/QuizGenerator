@@ -132,11 +132,9 @@ const QuizSpace = () => {
             "Authorization": `Bearer ${authInfo.accessToken}`
           }
         });
-        console.log("response:",response.data)
-        const updatedCategories = Array.isArray(response.data) ? response.data : [response.data];
-
+     
             // authInfo.categories 업데이트
-            updateAuthInfo({ ...authInfo, categories: updatedCategories });
+            updateAuthInfo({ ...authInfo, categories: response.data });
       } catch (error) {
         console.error('카테고리 삭제 중 오류 발생:', error);
       }
@@ -144,7 +142,7 @@ const QuizSpace = () => {
   };
   const handleEditCategory = async (categoryId, newDepartmentName) => {
     try {
-      const response = await axios.patch(`/category/${categoryId}`, { Department: newDepartmentName }, {
+      const response = await axios.patch(`/category/${categoryId}`, { department: newDepartmentName }, {
         headers: {
           "Authorization": `Bearer ${authInfo.accessToken}`
         }
@@ -608,7 +606,7 @@ const handleKeyDown = (event) => {
                   }
                 });
                 // API 응답을 기반으로 quizzes 상태를 설정
-                console.log(response);
+                updateAuthInfo({ ...authInfo, categories: response.data });
 
               } catch (error) {
                 console.error('데이터 가져오기 실패:', error);
