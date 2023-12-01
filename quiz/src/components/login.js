@@ -9,7 +9,9 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const { updateAuthInfo } = useContext(AuthContext);
-  
+  useEffect(() => {
+    updateAuthInfo({ name: '', accessToken: '', categories: [] });
+  }, []);
 
   const handleLogin = () => {
     console.log("login clicked");
