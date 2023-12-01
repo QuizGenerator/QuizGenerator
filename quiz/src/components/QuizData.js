@@ -10,7 +10,7 @@ function QuizData() {
   const [difficulty, setDifficulty] = useState(2);
   const [quizCount, setQuizCount] = useState(1);
   const { authInfo,updateAuthInfo } = useContext(AuthContext);
-  
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
     // authInfo.accessToken이 빈 문자열이면 로그인 페이지로 리디렉션
@@ -57,6 +57,13 @@ function QuizData() {
   };
 
   const handleCreateQuiz = async () => {
+    if (quizContent.length <= 500 || quizContent.length >= 2000) {
+      alert('퀴즈 내용은 500글자 이상, 2000글자 이하이어야 합니다.');
+      return;
+    }
+    // 로딩 상태 시작
+  setIsLoading(true);
+
     let prompt;
   if (questionType === '주관식') {
     prompt = `Please create ${quizCount} subjective questions based on the following format: Q#(# is number).""" \\nA#(# is number).""" \\n Difficulty: ${difficultyLevels[difficulty-1]}\\n${quizContent}`;
@@ -129,10 +136,24 @@ function QuizData() {
       console.error('GPT API 호출 중 오류 발생:', error);
       alert('퀴즈 생성에 실패했습니다.');
     }
+    finally {
+      // 로딩 상태 종료
+      setIsLoading(false);
+    }
   };
 
  
-
+  const renderCreateQuizButton = () => {
+   
+    return (
+      <button
+        onClick={handleCreateQuiz}
+        style={buttonStyle}
+      >
+        Quiz 생성
+      </button>
+    );
+  };
 
   
 
@@ -154,6 +175,31 @@ function QuizData() {
       <span style={{ marginLeft: '10px' }}>퀴즈 최대 갯수: {maxQuizCount}</span>
     </div>
   );
+
+  const renderLoadingScreen = () => {
+    if (isLoading) {
+      return (
+        <div style={loadingScreenStyle}>
+          {/* 로딩 표시 (예: 스피너, 로딩 메시지 등) */}
+          <p style={{ fontSize: '24px', color: '#FF9800',fontWeight: 'bold', }}>문제 생성중...</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const loadingScreenStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 반투명 배경
+    zIndex:300
+  };
   const navigateToQGBtnStyle = {
     // 배치
     position: 'absolute',
@@ -258,6 +304,7 @@ function QuizData() {
   };
   return (
     <div style={mainContainerStyle}>
+      {renderLoadingScreen()}
        <button onClick={navigateToQG} style={navigateToQGBtnStyle}>
         QG
       </button>
@@ -302,9 +349,9 @@ function QuizData() {
             <span>난이도 : {difficultyLevels[difficulty - 1]}</span>
           </div>
           {quizCountInputSection}
-          <button onClick={handleCreateQuiz} style={buttonStyle}>
-            Quiz 생성
-          </button>
+          {renderCreateQuizButton()}
+          
+          
           </div>
       
       </div>
