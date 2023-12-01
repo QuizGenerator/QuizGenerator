@@ -116,7 +116,7 @@ function QuizSet() {
   flexDirection: 'column',
     alignItems: 'flex-start',
     zIndex: 1, // 주황색 배경 위에 위치
-    overflow: 'hidden', // 내용이 넘치지 않도록 설정
+    overflow: 'auto', // 내용이 넘치지 않도록 설정
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // 그림자 효과 추가
 
   };

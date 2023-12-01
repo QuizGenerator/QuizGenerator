@@ -171,7 +171,7 @@ const contentContainerStyle = {
   flexDirection: 'column',
   alignItems: 'flex-start',
   zIndex: 1,
-  overflow: 'hidden',
+  overflow: 'auto',
   boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
 };
 

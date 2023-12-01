@@ -20,7 +20,7 @@ function App() {
       <AuthProvider>
     <BrowserRouter>
     <Routes>
-    <Route path="/" exact={true} element={<Main />}></Route>
+    <Route path="/" exact={true} element={<LoginPage />}></Route>
     <Route path="/login" exact={true} element={<LoginPage />}></Route>
     <Route path="/signup" exact={true} element={<Signup />}></Route>
     <Route path="/QuizData" exact={true} element={<QZPage />}></Route>
